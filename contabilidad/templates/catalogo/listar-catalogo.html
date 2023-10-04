@@ -1,0 +1,33 @@
+{% extends "layouts/base.html" %}
+{% block title %}Catalogo{% endblock %}
+
+{% block content %}
+    <h1>Plan de cuentas</h1>
+    <table class="table">
+        <thead>
+            <th>Codigo</th>
+            <th>Cuenta</th>
+            <th>Tipo</th>
+        </thead>
+        <tbody>
+            
+            {% for cuenta in catalogo%}
+            <tr>
+                <td>{{ cuenta.codigo }}</td>
+                <td>{{ cuenta.nombre }}</td>
+                <td>{{ cuenta.get_categoria_display }}</td>
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block filtros%}
+    <span>Anio</span>
+    <input type="text" name="anio" id="anio">
+    <a href="{% url 'conta:cargar-balance' %}">Cargar Balance</a>
+{% endblock %}
+
+
+    

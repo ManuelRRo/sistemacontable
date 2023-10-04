@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+{% block title %}Catalogo{% endblock %}
+
+{% block content %}
+    <h1>Catalogo de cuentas</h1>
+    <table>
+        <thead>
+            <th>Codigo</th>
+            <th>Cuenta</th>
+            <th>Tipo</th>
+        </thead>
+        <tbody>
+            
+            {% for cuenta, valores in catalogo.items %}
+            <tr>
+                <td>{{ valores.codigo }}</td>
+                <td>{{ valores.cuenta }}</td>
+                <td>{{ valores.tipo.label }}</td>
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+{% endblock %}
+
+
+    

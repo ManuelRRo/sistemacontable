@@ -1,0 +1,881 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2023-09-07T05:15:05.822Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "1",
+    "object_repr": "Compra de algo",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2023-09-07T15:36:48.883Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "1",
+    "object_repr": "Compra de algo",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2023-09-07T16:34:18.617Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "2",
+    "object_repr": "Caja y bancos",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 4,
+  "fields": {
+    "action_time": "2023-09-07T16:35:22.683Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "3",
+    "object_repr": "Comerciales",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 5,
+  "fields": {
+    "action_time": "2023-09-07T16:35:57.027Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "4",
+    "object_repr": "sfasdf",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 6,
+  "fields": {
+    "action_time": "2023-09-07T16:36:50.149Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "5",
+    "object_repr": "gdfgsdf",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 7,
+  "fields": {
+    "action_time": "2023-09-07T16:37:58.932Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "6",
+    "object_repr": "sfasdf2",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 8,
+  "fields": {
+    "action_time": "2023-09-07T16:38:11.718Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "6",
+    "object_repr": "sfasdf2",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Naturaleza\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 9,
+  "fields": {
+    "action_time": "2023-09-07T16:39:29.094Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "7",
+    "object_repr": "erqwerqwer",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 10,
+  "fields": {
+    "action_time": "2023-09-07T16:40:18.257Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "8",
+    "object_repr": "sfasdf67",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 11,
+  "fields": {
+    "action_time": "2023-09-07T16:40:23.543Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "8",
+    "object_repr": "sfasdf67",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Naturaleza\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 12,
+  "fields": {
+    "action_time": "2023-09-07T16:41:29.323Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "23",
+    "object_repr": "Activo No Corriente",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 13,
+  "fields": {
+    "action_time": "2023-09-07T16:45:13.672Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "9",
+    "object_repr": "sfasdf098",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 1,
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": 1,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 1,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 1,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 1,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 2,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 2,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 2,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 2,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 3,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 3,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 3,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 3,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add user",
+    "content_type": 4,
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change user",
+    "content_type": 4,
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete user",
+    "content_type": 4,
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view user",
+    "content_type": 4,
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 5,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 5,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 5,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 5,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 6,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 6,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 6,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 6,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add cuenta",
+    "content_type": 7,
+    "codename": "add_cuenta"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change cuenta",
+    "content_type": 7,
+    "codename": "change_cuenta"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete cuenta",
+    "content_type": 7,
+    "codename": "delete_cuenta"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view cuenta",
+    "content_type": 7,
+    "codename": "view_cuenta"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add transaccion",
+    "content_type": 8,
+    "codename": "add_transaccion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change transaccion",
+    "content_type": 8,
+    "codename": "change_transaccion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete transaccion",
+    "content_type": 8,
+    "codename": "delete_transaccion"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view transaccion",
+    "content_type": 8,
+    "codename": "view_transaccion"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$vwmnMcg6XaGooh9OKOdDk1$yiBWQCWiFkJcIszJhs09bsEa+LwveIOa8iWnjMpiKuw=",
+    "last_login": "2023-09-07T15:35:29.548Z",
+    "is_superuser": true,
+    "username": "django",
+    "first_name": "",
+    "last_name": "",
+    "email": "django@mail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2023-09-07T03:38:38.969Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 1,
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 2,
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 3,
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 4,
+  "fields": {
+    "app_label": "auth",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 5,
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 6,
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 7,
+  "fields": {
+    "app_label": "contabilidad",
+    "model": "cuenta"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 8,
+  "fields": {
+    "app_label": "contabilidad",
+    "model": "transaccion"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "42gx8t3b2fp0jv6emu4k0vhlxdvzdc6f",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQRf-FtSEM5VFcuu83kGEGpWogKe3K-O_apAvd3nPOfYmI21ri1vMSZxZnAeL0uyWkR6474DvWW5PU6rrMSe6KPGiXU-P8vBzu30HBXr61HszVD56chczegbIQQJvRGjZICgEzOMTgkgdFpI0bk0qBM3pUzrB4fwC65zdX:1qeH2X:qLIF2Y7f8wC5Y7ySYb_Q2bFAmxlynDkxgpwRjMg2osk",
+    "expire_date": "2023-09-21T15:35:29.555Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "vk9ehoj91a32tuh25mv8ob1xw2lxg5sy",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQRf-FtSEM5VFcuu83kGEGpWogKe3K-O_apAvd3nPOfYmI21ri1vMSZxZnAeL0uyWkR6474DvWW5PU6rrMSe6KPGiXU-P8vBzu30HBXr61HszVD56chczegbIQQJvRGjZICgEzOMTgkgdFpI0bk0qBM3pUzrB4fwC65zdX:1qe5tW:qk1XH4JT0Pq5yojgf6D5tdYmfAL_FKa0WA_G0qA4Dg0",
+    "expire_date": "2023-09-21T03:41:26.838Z"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 1,
+  "fields": {
+    "codigo": "1.0",
+    "nombre": "Activo",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 2,
+  "fields": {
+    "codigo": "11.0",
+    "nombre": "Activo/AcivoCorriente",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 3,
+  "fields": {
+    "codigo": "1101.0",
+    "nombre": "Efectivo y equivalente de efectivo",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 4,
+  "fields": {
+    "codigo": "1101.01",
+    "nombre": "Caja y Bancos",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 5,
+  "fields": {
+    "codigo": "1101.02",
+    "nombre": "Cuentas por Cobrar Comerciales ",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 6,
+  "fields": {
+    "codigo": "1101.03",
+    "nombre": "Otras Cuentas por Cobrar",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 7,
+  "fields": {
+    "codigo": "1101.04",
+    "nombre": "Inventarios",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 8,
+  "fields": {
+    "codigo": "1101.05",
+    "nombre": "Gastos Pagados por Anticipados",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 9,
+  "fields": {
+    "codigo": "1101.06",
+    "nombre": "Inversiones en Valores",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 10,
+  "fields": {
+    "codigo": "1101.07",
+    "nombre": "Activo Fijo Neto",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 11,
+  "fields": {
+    "codigo": "2.0",
+    "nombre": "Pasivo",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 12,
+  "fields": {
+    "codigo": "21.0",
+    "nombre": "Pasivo Corriente",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 13,
+  "fields": {
+    "codigo": "2101.0",
+    "nombre": "Sobregiros y Préstamos Bancarios",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 14,
+  "fields": {
+    "codigo": "2101.01",
+    "nombre": "Cuentas por Pagar Comerciales ",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 15,
+  "fields": {
+    "codigo": "2101.02",
+    "nombre": "Otras Cuentas por Pagar",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 16,
+  "fields": {
+    "codigo": "2101.03",
+    "nombre": "Parte Corriente Deuda a L.P.",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 17,
+  "fields": {
+    "codigo": "22.0",
+    "nombre": "Pasivo No Corriente",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 18,
+  "fields": {
+    "codigo": "2201.01",
+    "nombre": "Provisión CTS",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 19,
+  "fields": {
+    "codigo": "2201.01",
+    "nombre": "Deuda a Largo Plazo",
+    "categoria": "PSV"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 20,
+  "fields": {
+    "codigo": "3.0",
+    "nombre": "Patrimonio",
+    "categoria": "PTR"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 21,
+  "fields": {
+    "codigo": "3101.0",
+    "nombre": "Capital Social",
+    "categoria": "PTR"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 22,
+  "fields": {
+    "codigo": "3101.01",
+    "nombre": "Resultados Acumulados",
+    "categoria": "PTR"
+  }
+},
+{
+  "model": "contabilidad.cuenta",
+  "pk": 23,
+  "fields": {
+    "codigo": "111",
+    "nombre": "Activo No Corriente",
+    "categoria": "ASV"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 1,
+  "fields": {
+    "monto": "12300.00",
+    "descripcion": "Compra de algo",
+    "slug": "dsfasdfas",
+    "cuenta": 1,
+    "fecha_creacion": "2023-09-07T05:13:32Z",
+    "tipo_transaccion": "CMP",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 2,
+  "fields": {
+    "monto": "382.00",
+    "descripcion": "Caja y bancos",
+    "slug": "ghjkjh",
+    "cuenta": 4,
+    "fecha_creacion": "2023-09-07T16:33:30Z",
+    "tipo_transaccion": "VNT",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 3,
+  "fields": {
+    "monto": "3804.00",
+    "descripcion": "Comerciales",
+    "slug": "sdfasdf",
+    "cuenta": 5,
+    "fecha_creacion": "2023-09-07T16:34:41Z",
+    "tipo_transaccion": "CMP",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 4,
+  "fields": {
+    "monto": "255.00",
+    "descripcion": "sfasdf",
+    "slug": "assassins-credd-ii3",
+    "cuenta": 6,
+    "fecha_creacion": "2023-09-07T16:35:30Z",
+    "tipo_transaccion": "VNT",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 5,
+  "fields": {
+    "monto": "6307.00",
+    "descripcion": "gdfgsdf",
+    "slug": "dfgsdfg",
+    "cuenta": 7,
+    "fecha_creacion": "2023-09-07T16:36:28Z",
+    "tipo_transaccion": "VNT",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 6,
+  "fields": {
+    "monto": "1017.00",
+    "descripcion": "sfasdf2",
+    "slug": "ghjkjhe",
+    "cuenta": 8,
+    "fecha_creacion": "2023-09-07T16:37:11Z",
+    "tipo_transaccion": "VNT",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 7,
+  "fields": {
+    "monto": "33.00",
+    "descripcion": "erqwerqwer",
+    "slug": "rwqerqwer",
+    "cuenta": 9,
+    "fecha_creacion": "2023-09-07T16:39:11Z",
+    "tipo_transaccion": "VNT",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 8,
+  "fields": {
+    "monto": "5180.00",
+    "descripcion": "sfasdf67",
+    "slug": "34534gfg",
+    "cuenta": 10,
+    "fecha_creacion": "2023-09-07T16:39:59Z",
+    "tipo_transaccion": "VNT",
+    "naturaleza": "DBT"
+  }
+},
+{
+  "model": "contabilidad.transaccion",
+  "pk": 9,
+  "fields": {
+    "monto": "5213.00",
+    "descripcion": "sfasdf098",
+    "slug": "gkgkgkg",
+    "cuenta": 23,
+    "fecha_creacion": "2023-09-07T16:44:55Z",
+    "tipo_transaccion": "VNT",
+    "naturaleza": "DBT"
+  }
+}
+]

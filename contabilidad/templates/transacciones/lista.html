@@ -1,0 +1,43 @@
+
+{% extends "layouts/base.html" %}
+{% block title %}Transacciones{% endblock %}
+
+{% block content %}
+    <h1>Balance General</h1>
+
+    <table class="table">
+        <thead>
+            <th>Cuenta</th>
+            <!-- <th>Debe</th>
+            <th>Haber</th> -->
+            <th>Total</th>
+        </thead>
+        <tbody>
+            
+            {% for cuenta, valores in diccionario_cuentas.items %}
+            <tr>
+                <td>{{ cuenta }}</td>
+                <!-- <td>{{ valores.saldo_debito }}</td>  debe -->
+                <!-- <td>{{ valores.saldo_credito }}</td> Haber -->
+                <td>{{ valores.total }}</td>
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+{% endblock %}
+{% block filtros%}
+<form method="post">
+    {% csrf_token %}
+    <label for="fname">Fecha inicial</label><br>
+    <input type="date" id="año" name="fechainicio" value="Año"><br>
+
+    <label for="fame">Fecha final</label><br>
+    <input type="date" id="año" name="fechafinal" value="Año"><br>
+    
+    <input type="submit" value="Submit">
+</form> 
+<h2>{{balance}}</h2>
+
+{% endblock %}
+

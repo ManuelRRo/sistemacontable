@@ -1,0 +1,30 @@
+
+{% extends "layouts/base.html" %}
+{% block title %}Balance General{% endblock %}
+
+{% block content %}
+    <h1>Cargar Balance General</h1>
+
+<form method="post" enctype="multipart/form-data">
+{{ form.as_p }}
+{% csrf_token %}
+<p><input type="submit" value="Save changes"></p>
+</form>
+
+ {% endblock %}
+
+{% block filtros%}
+<form method="post">
+    {% csrf_token %}
+    <label for="fname">Fecha inicial</label><br>
+    <input type="date" id="año" name="fechainicio" value="Año"><br>
+
+    <label for="fame">Fecha final</label><br>
+    <input type="date" id="año" name="fechafinal" value="Año"><br>
+    
+    <input type="submit" value="Submit">
+</form> 
+<h2>{{balance}}</h2>
+
+{% endblock %}
+
