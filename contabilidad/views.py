@@ -1,15 +1,34 @@
-import pandas
 from django.shortcuts import render,redirect
-from django.urls import reverse_lazy
-from django.db.models import Sum
-from decimal import Decimal
-from .forms import CatalagoForm
-from .models import Transaccion,Cuenta
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.utils import timezone
 
+import pandas
+from django.db.models import Sum
+from decimal import Decimal
 
+from .forms import CatalagoForm
+from .models import Transaccion,Cuenta,Propietario,Empresa
+
+
+@login_required()
 def lista_transacciones(request):
+    usuario = request.user
+    empresacreada = True
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=usuario)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+        empresacreada = False
+        
     totalactivos = 0
     total = 0
     year_1 = ""
@@ -50,7 +69,8 @@ def lista_transacciones(request):
     contexto = {'cuentasActivos': cuentasActivos,
                 'totalActivos': total,
                 'diccionario_cuentas':diccionario_cuentas,
-                'pathbase':settings.BASE_DIR}
+                'pathbase':settings.BASE_DIR,
+                'empresa_creada':empresacreada}
 
     return render(request,
            'transacciones/lista.html'

@@ -1,7 +1,6 @@
 from django.db import models
-
-from django.db import models
 from django.utils import timezone
+from django.conf import settings
 
 # Managers
 
@@ -19,6 +18,12 @@ class CuentasHaberManager(models.Manager):
 
 #HU-02 Modulo de registros de empresa
 
+class Propietario(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                       on_delete=models.CASCADE)
+    def __str__(self):
+        return f'{self.user.username}'
+
 class Catalogo(models.Model):
     nombre_catalogo = models.CharField(max_length=255,blank=False)
     archivo = models.FileField(upload_to='archivos_excel/',blank=False)
@@ -30,7 +35,11 @@ class Empresa(models.Model):
     nombre_empresa = models.CharField(max_length=255,blank=False)
     catalogo_empresa = models.OneToOneField(Catalogo,
                                    on_delete=models.CASCADE,
-                                   primary_key=True)
+                                   )
+    propietario = models.OneToOneField(Propietario,
+                                       on_delete=models.CASCADE,
+                                       )
+    
     
     def __str__(self):
         return self.nombre_empresa

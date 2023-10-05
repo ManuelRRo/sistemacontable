@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Cuenta,Transaccion,Empresa,Catalogo
+from .models import Cuenta,Transaccion,Empresa,Catalogo,Propietario
 
 @admin.register(Cuenta)
 class CuentaAdmin(admin.ModelAdmin):
@@ -17,3 +17,7 @@ class CatalogoAdmin(admin.ModelAdmin):
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Propietario)
+class EmpresaAdmin(admin.ModelAdmin):
+    list_display = ['user']

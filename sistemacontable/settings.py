@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'contabilidad.apps.ContabilidadConfig'
+    'contabilidad.apps.ContabilidadConfig',
+    'usuarios.apps.UsuariosConfig',
 ]
 
 MIDDLEWARE = [
@@ -113,3 +114,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/usuario/login_user'
+LOGOUT_REDIRECT_URL = "/"
