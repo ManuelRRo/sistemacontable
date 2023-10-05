@@ -21,11 +21,12 @@ class CuentasHaberManager(models.Manager):
 class Propietario(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                        on_delete=models.CASCADE)
+    empresactiva = models.BooleanField(default=False)
     def __str__(self):
         return f'{self.user.username}'
 
 class Catalogo(models.Model):
-    nombre_catalogo = models.CharField(max_length=255,blank=False)
+    nombre_catalogo = models.CharField(max_length=255,blank=True)
     archivo = models.FileField(upload_to='archivos_excel/',blank=False)
     
     def __str__(self):

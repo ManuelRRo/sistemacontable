@@ -6,9 +6,9 @@ from django.conf.urls.static import static
 app_name = 'conta'
 
 urlpatterns = [
-    path('',views.lista_transacciones,name="transaccion-lista"),
+    path('',views.cargarBalanceGeneral,name="transaccion-lista"),
     path('catalogo/',views.ListarCatalogo,name="catalogo"),
-    path('cargaBalance/',views.CargarBalance,name="cargar-balance"),
+    path('cargaEmpresa/',views.CrearEmpresa,name="cargar-balance"),
 ]
 
 if settings.DEBUG:

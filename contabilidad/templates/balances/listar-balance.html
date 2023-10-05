@@ -3,12 +3,14 @@
 {% block title %}Balance General{% endblock %}
 
 {% block content %}
-    <h1>Cargar Balance General</h1>
+    <h1>Registrar Empresa</h1>
 
 <form method="post" enctype="multipart/form-data">
-{{ form.as_p }}
-{% csrf_token %}
-<p><input type="submit" value="Save changes"></p>
+    {{empresa_form.as_p}}
+    <h6>Cargar Balance General</h6>
+    {{ form.as_p }}
+    {% csrf_token %}
+    <p><input type="submit" value="Guardar"></p>
 </form>
 
  {% endblock %}

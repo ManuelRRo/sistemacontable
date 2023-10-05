@@ -3,7 +3,7 @@
 {% block title %}Transacciones{% endblock %}
 
 {% block content %}
-   {% if empresa_creada %}
+   {% if user.propietario.empresactiva %}
    <h1>Balance General</h1>
 
    <table class="table">
@@ -27,21 +27,6 @@
        </tbody>
    </table>
 
-   {% block filtros%}
-   {% if empresa_creada %}
-   <form method="post">
-      {% csrf_token %}
-      <label for="fname">Fecha inicial</label><br>
-      <input type="date" id="año" name="fechainicio" value="Año"><br>
-   
-      <label for="fame">Fecha final</label><br>
-      <input type="date" id="año" name="fechafinal" value="Año"><br>
-      
-      <input type="submit" value="Submit">
-       </form> 
-       <h2>{{balance}}</h2>
-    {% endif %}
-   {% endblock %}
 
 {% else %}
 
@@ -51,3 +36,18 @@
 
 {% endblock %}
 
+
+{% block filtros%}
+{% if user.propietario.empresactiva %}
+<form method="post">
+   {% csrf_token %}
+   <label for="fname">Fecha inicial</label><br>
+   <input type="date" id="año" name="fechainicio" value="Año"><br>
+
+   <label for="fame">Fecha final</label><br>
+   <input type="date" id="año" name="fechafinal" value="Año"><br>
+   
+   <input type="submit" value="Enviar">
+    </form> 
+ {% endif %}
+{% endblock %}
