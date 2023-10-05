@@ -45,6 +45,7 @@ def cargarBalanceGeneral(request):
 
     try:
         cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
+        print(cuentasActivos)
         for cuenta in cuentasActivos:
             saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
                                                         fecha_creacion__range=(year_1,year_2)
@@ -149,6 +150,10 @@ def CrearEmpresa(request):
 
 
 def ListarCatalogo(request):
-    catalogo = Cuenta.objects.all()
+    catalogo = {}
+    try:
+        catalogo = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
+    except:
+        print("No hay catalogo")
     return render(request,'catalogo/listar-catalogo.html',{'catalogo':catalogo})
     
