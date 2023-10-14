@@ -3,13 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.utils import timezone
+from django.views.generic import View
+from django.db.models import Q
 
 import pandas
 from django.db.models import Sum
 from decimal import Decimal
 
 from .forms import CatalagoForm,EmpresaForm
-from .models import Transaccion,Cuenta,Propietario,Empresa
+from .models import Catalogo, Transaccion,Cuenta,Propietario,Empresa
 
 
 @login_required()
@@ -91,12 +93,12 @@ def CrearEmpresa(request):
         print(form.errors)
         if form.is_valid() and empresa_form.is_valid():
             #Crear catalogo
-            catalago_excel = form.save()
+            catalogo_excel = form.save()
             #get nombre empresa
             nombreempresa = empresa_form.cleaned_data['nombre_empresa']
             #Crear la empresa
             new_empresa = Empresa(nombre_empresa=nombreempresa,
-                                  catalogo_empresa=catalago_excel,
+                                  catalogo_empresa=catalogo_excel,
                                   propietario=propietario_empresa)
             new_empresa.save()
             #activar la empresa
@@ -105,9 +107,10 @@ def CrearEmpresa(request):
             p.save()
             
             #Leer catalogo en excel
-            path = f"{settings.MEDIA_ROOT}\{catalago_excel.archivo}"
+            path = f"{settings.MEDIA_ROOT}/{catalogo_excel.archivo}"
             data = pandas.read_excel(path,sheet_name="BGN")
             balance = {}
+            
             for index, row in data.iterrows():
                 #Extraer primer caracter de la columna codigo
                 cod = str(row['codigo'])[0]
@@ -125,7 +128,7 @@ def CrearEmpresa(request):
                     codigo = row["codigo"],
                     nombre = row["cuenta"],
                     categoria = tipo,
-                    catalago = catalago_excel
+                    catalogo = catalogo_excel
                 )
 
                 t = Transaccion.objects.create(
@@ -137,6 +140,63 @@ def CrearEmpresa(request):
                     tipo_transaccion="CMP",
                     naturaleza = "DBT"
                 )
+
+            # Leer hoja ERS - Estado de Resultados
+            hoja_ers = pandas.read_excel(path, sheet_name="ERS")
+
+            # Obtener años
+            lista_anios = [hoja_ers.columns[2], hoja_ers.columns[3], hoja_ers.columns[4]]
+
+            # Variables a utilizar
+            codigo_ers = ''
+            categoria_ers = ''
+            subcategoria_ers = ''
+            naturaleza_ers = ''
+
+            for index, row in hoja_ers.iterrows():
+                # Extraer caracteres de la columna codigo
+                codigo_ers = str(row['codigo'])
+                categoria_ers = ''
+
+                # Asignar categoria de cada cuenta
+                if codigo_ers[0] == '4':
+                    categoria_ers = Cuenta.Categoria.RESULTADOS_DEUDORAS
+                    naturaleza_ers = Transaccion.Naturaleza.CREDITO
+                    # Asignar subcategoria
+                    if codigo_ers[1] == '1':
+                        subcategoria_ers = Cuenta.Subcategoria.COSTOS
+                    elif codigo_ers[1] == '2':
+                        subcategoria_ers = Cuenta.Subcategoria.GASTOS_OPERACIONALES
+                elif codigo_ers[0] == '5':
+                    categoria_ers = Cuenta.Categoria.RESULTADOS_ACREEDORAS
+                    naturaleza_ers = Transaccion.Naturaleza.DEBITO
+                    # Asignar subcategoria
+                    if codigo_ers[1] == '1': 
+                        subcategoria_ers = Cuenta.Subcategoria.INGRESOS_OPERACIONALES
+                else:
+                    categoria_ers = Cuenta.Categoria.ESTADO_RESULTADOS
+                    subcategoria_ers = Cuenta.Subcategoria.NINGUNA
+                
+                # Crear cuenta con los datos anteriores
+                cuenta_ers = Cuenta.objects.create(
+                    codigo = row["codigo"],
+                    nombre = row["cuenta"],
+                    categoria = categoria_ers,
+                    subcategoria = subcategoria_ers,
+                    catalogo = catalogo_excel
+                )
+
+                for anio in lista_anios:
+                    Transaccion.objects.create(
+                        monto=Decimal(row[anio]),
+                        descripcion="Cuenta del " + str(anio),
+                        slug="Estado de Resultado",
+                        cuenta=cuenta_ers,
+                        fecha_creacion=f"{str(anio)}-10-25 00:00:00",
+                        tipo_transaccion="OPE",
+                        naturaleza = naturaleza_ers
+                    )
+
 
             contexto["balance"] = "Balance general cargado correctamente"
             return redirect('conta:transaccion-lista')
@@ -156,4 +216,42 @@ def ListarCatalogo(request):
     except:
         print("No hay catalogo")
     return render(request,'catalogo/listar-catalogo.html',{'catalogo':catalogo})
+
+
+# Mostrar Estados de Resultados 
+# (Empresa Registrada)
+# Se ha implementado el login_required
+class VerEstadoResultado(View):
+    model_transaccion = Transaccion
+    model_empresa = Empresa
+    template_name = 'estados_financieros/estado_resultados.html'
+
+    def get_queryset(self):
+        empresa = self.model_empresa.objects.get(propietario__user=self.request.user)
+        # Crear tres objetos Q, uno para cada categoría
+        q1 = Q(cuenta__categoria=Cuenta.Categoria.RESULTADOS_DEUDORAS)
+        q2 = Q(cuenta__categoria=Cuenta.Categoria.RESULTADOS_ACREEDORAS)
+        q3 = Q(cuenta__categoria=Cuenta.Categoria.ESTADO_RESULTADOS)
+        q4 = Q(cuenta__catalogo=empresa.catalogo_empresa)
+        # Combinar los objetos Q con el operador 'OR' usando '|'
+        transacciones = self.model_transaccion.objects.filter((q1 | q2 | q3) & q4)
+        return transacciones
+    
+    def get_context_data(self, **kwargs):
+        context = {}
+        context["transaccion_cuenta"] = self.get_queryset()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+    
+    def post(self, request, *args, **kwargs):
+        context = {}
+        fecha_inicio = request.POST['fechainicio']
+        fecha_final = request.POST['fechafinal']
+        context["transaccion_cuenta"] = self.get_context_data()["transaccion_cuenta"].filter(fecha_creacion__range=(fecha_inicio,fecha_final))
+        context["fecha_inicio"] = fecha_inicio
+        context["fecha_final"] = fecha_final
+        return render(request, self.template_name, context) 
+ 
     

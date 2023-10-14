@@ -26,7 +26,7 @@ class Propietario(models.Model):
         return f'{self.user.username}'
 
 class Catalogo(models.Model):
-    nombre_catalogo = models.CharField(max_length=255,blank=True)
+    nombre_catalogo = models.CharField(max_length=255,blank=True, default="catalogo")
     archivo = models.FileField(upload_to='archivos_excel/',blank=False)
     
     def __str__(self):
@@ -50,11 +50,13 @@ class Empresa(models.Model):
 class Cuenta(models.Model):
 
     class Categoria(models.TextChoices):
+        BALANCE_GENERAL = 'BAG','Balance General'
         ACTIVO='ASV','Activo'
         PASIVO = 'PSV','Pasivo'
         PATRIMONIO = 'PTR','Patrimonio'
-        INGRESOS = 'ING','Ingresos'
-        GASTOS = 'GST','Gastos'
+        ESTADO_RESULTADOS = 'ESR','Estado de Resultados'
+        RESULTADOS_DEUDORAS = 'CRD', 'Cuentas de Resultados Deudoras'
+        RESULTADOS_ACREEDORAS = 'CRA', 'Cuentas de Resultados Acreedoras'
 
     class Subcategoria(models.TextChoices):
         NINGUNA = 'NNG','Sin SubCategoria'
@@ -62,6 +64,9 @@ class Cuenta(models.Model):
         ACTIVONOCORRIENTE = 'ACTNC','Activo No Corriente'
         PASIVOCORRIENTE = 'PSVC','Pasivo Corriente'
         PASIVONOCORRIENTE = 'PSVNC','Pasivo No Corriente'
+        COSTOS = 'CTS', 'COSTOS DE VENTA'
+        GASTOS_OPERACIONALES = 'GTOP', 'Gastos Operacionales'
+        INGRESOS_OPERACIONALES = 'INOP', 'Ingresos Operacionales'
 
     codigo = models.CharField(max_length=255,blank=False)
     nombre = models.CharField(max_length=255,blank=False)
@@ -71,7 +76,7 @@ class Cuenta(models.Model):
     subcategoria = models.CharField(max_length=5,
                                     choices=Subcategoria.choices,
                                     default=Subcategoria.NINGUNA)
-    catalago = models.ForeignKey(Catalogo,
+    catalogo = models.ForeignKey(Catalogo,
                                  on_delete=models.CASCADE,
                                  related_name='cuentas')
     #Managers
@@ -89,6 +94,7 @@ class Transaccion (models.Model):
     class TipoTransaccion(models.TextChoices):
         COMPRA = 'CMP','Compra'
         VENTA = 'VNT','Venta'
+        OPERACIONAL = 'OPE', 'Operacional' #Pendiente
     
     class Naturaleza(models.TextChoices):
         CREDITO = 'CRD','Credito' #haber
