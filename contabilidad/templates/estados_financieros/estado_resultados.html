@@ -1,15 +1,15 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}
-    Estado de Resultados | 
+    ANF115 | Estado de Resultados
 {% endblock %}
 
-{% block content %}
-
+{% block content %}    
     {% for elemento in transaccion_cuenta %}
         {{elemento}}
         </br>
     {% endfor %}
+    
 {% endblock %}
 
 {% block filtros%}
