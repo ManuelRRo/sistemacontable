@@ -109,10 +109,12 @@ def CrearEmpresa(request):
             
             #Leer catalogo en excel
             path = f"{settings.MEDIA_ROOT}/{catalogo_excel.archivo}"
-            data = pandas.read_excel(path,sheet_name="BGN")
+            hoja_bgn = pandas.read_excel(path,sheet_name="BGN")
             balance = {}
+
+            lista_anios = [hoja_bgn.columns[2], hoja_bgn.columns[3], hoja_bgn.columns[4],hoja_bgn.columns[5]]
             
-            for index, row in data.iterrows():
+            for index, row in hoja_bgn.iterrows():
                 #Extraer primer caracter de la columna codigo
                 cod = str(row['codigo'])[0]
                 tipo = ''
@@ -131,16 +133,19 @@ def CrearEmpresa(request):
                     categoria = tipo,
                     catalogo = catalogo_excel
                 )
-
-                t = Transaccion.objects.create(
-                    monto=Decimal(row["valor"]),
-                    descripcion="jfksl",
-                    slug="kdsa",
-                    cuenta=cuenta,
-                    fecha_creacion=f"{str(row['anio'])}-10-25 00:00:00",
-                    tipo_transaccion="CMP",
-                    naturaleza = "DBT"
-                )
+                try:
+                    for anio in lista_anios:
+                        t = Transaccion.objects.create(
+                            monto=Decimal(row[anio]),
+                            descripcion="Cuenta del " + str(anio),
+                            slug="Balance general",
+                            cuenta=cuenta,
+                            fecha_creacion=f"{str(anio)}-10-25 00:00:00",
+                            tipo_transaccion="CMP",
+                            naturaleza = "DBT"
+                        )
+                except:
+                    print(row[anio])
 
             # Leer hoja ERS - Estado de Resultados
             hoja_ers = pandas.read_excel(path, sheet_name="ERS")
