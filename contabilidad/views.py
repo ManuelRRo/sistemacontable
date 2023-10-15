@@ -112,7 +112,7 @@ def CrearEmpresa(request):
             hoja_bgn = pandas.read_excel(path,sheet_name="BGN")
             balance = {}
 
-            lista_anios = [hoja_bgn.columns[2], hoja_bgn.columns[3], hoja_bgn.columns[4],hoja_bgn.columns[5]]
+            lista_anios = [hoja_bgn.columns[2], hoja_bgn.columns[3], hoja_bgn.columns[4]]
             
             for index, row in hoja_bgn.iterrows():
                 #Extraer primer caracter de la columna codigo
