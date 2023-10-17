@@ -14,7 +14,7 @@ from .forms import CatalagoForm,EmpresaForm
 from .models import Catalogo, Transaccion,Cuenta,Propietario,Empresa
 from datetime import datetime
 
-
+#HU-24-Listar balance general
 @login_required()
 def cargarBalanceGeneral(request):
     usuario = request.user
@@ -80,11 +80,18 @@ def cargarBalanceGeneral(request):
            'transacciones/lista.html'
            ,contexto)
 
-
+#HU-002-Registrar empresa con catálogo, BGN Y ERS en formato excel
 def CrearEmpresa(request):
 
     contexto = {}
-    propietario_empresa = request.user.propietario
+    
+    try:
+        propietario_empresa = request.user.propietario
+    except:
+        print("No tiene Propietario Asignado")
+        contexto = {}
+        contexto["propietario"] = False
+        return render(request,'balances/listar-balance.html',contexto)
 
     if request.method == 'POST':
 
@@ -97,8 +104,10 @@ def CrearEmpresa(request):
             catalogo_excel = form.save()
             #get nombre empresa
             nombreempresa = empresa_form.cleaned_data['nombre_empresa']
+            sectorempresa = empresa_form.cleaned_data['sectores']
             #Crear la empresa
             new_empresa = Empresa(nombre_empresa=nombreempresa,
+                                  sector=sectorempresa,
                                   catalogo_empresa=catalogo_excel,
                                   propietario=propietario_empresa)
             new_empresa.save()
@@ -211,10 +220,11 @@ def CrearEmpresa(request):
         empresa_form = EmpresaForm()
         contexto["form"]=form
         contexto["empresa_form"] = empresa_form 
-               
+        contexto["propietario"] = True
+
     return render(request,'balances/listar-balance.html',contexto)
 
-
+#HU-023-Listar Cuentas del Catalogo
 def ListarCatalogo(request):
     catalogo = {}
     try:
@@ -223,7 +233,7 @@ def ListarCatalogo(request):
         print("No hay catalogo")
     return render(request,'catalogo/listar-catalogo.html',{'catalogo':catalogo})
 
-
+#HU-25-Listar Estados de Resultado
 # Mostrar Estados de Resultados 
 # (Empresa Registrada)
 # Se ha implementado el login_required

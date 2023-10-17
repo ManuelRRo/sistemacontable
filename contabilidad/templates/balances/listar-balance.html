@@ -3,19 +3,25 @@
 {% block title %}Balance General{% endblock %}
 
 {% block content %}
+{% if propietario %}
     <h1>Registrar Empresa</h1>
 
 <form method="post" enctype="multipart/form-data">
     {{empresa_form.as_p}}
     <h6>Cargar Balance General</h6>
     {{ form.as_p }}
+
     {% csrf_token %}
     <p><input type="submit" value="Guardar"></p>
 </form>
-
+{% else %}
+<h1>No Tiene propietario registrado</h1>
+{% endif%}
  {% endblock %}
 
+
 {% block filtros%}
+{% if propietario %}
 <form method="post">
     {% csrf_token %}
     <label for="fname">Fecha inicial</label><br>
@@ -27,6 +33,6 @@
     <input type="submit" value="Submit">
 </form> 
 <h2>{{balance}}</h2>
-
+{% endif%}
 {% endblock %}
 

@@ -33,7 +33,12 @@ class Catalogo(models.Model):
         return self.nombre_catalogo
 
 class Empresa(models.Model):
+
+    class Sector(models.TextChoices):
+        MINERA = 'MNR','Minería'
+
     nombre_empresa = models.CharField(max_length=255,blank=False)
+    sector = models.CharField(max_length=5,choices=Sector.choices,default=Sector.MINERA)
     catalogo_empresa = models.OneToOneField(Catalogo,
                                    on_delete=models.CASCADE,
                                    )
