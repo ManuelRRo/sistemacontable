@@ -17,7 +17,6 @@ class CuentasHaberManager(models.Manager):
 
 
 #HU-02 Modulo de registros de empresa
-
 class Propietario(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                        on_delete=models.CASCADE)
@@ -47,6 +46,7 @@ class Empresa(models.Model):
                                        )
     
     
+    
     def __str__(self):
         return self.nombre_empresa
 
@@ -67,11 +67,26 @@ class Cuenta(models.Model):
         NINGUNA = 'NNG','Sin SubCategoria'
         ACTIVOCORRIENTE = 'ACTC','Activo Corriente'
         ACTIVONOCORRIENTE = 'ACTNC','Activo No Corriente'
+        INVENTARIO = 'INVT','Inventario'
         PASIVOCORRIENTE = 'PSVC','Pasivo Corriente'
         PASIVONOCORRIENTE = 'PSVNC','Pasivo No Corriente'
         COSTOS = 'CTS', 'COSTOS DE VENTA'
         GASTOS_OPERACIONALES = 'GTOP', 'Gastos Operacionales'
         INGRESOS_OPERACIONALES = 'INOP', 'Ingresos Operacionales'
+    
+    class CuentaRatio(models.TextChoices):
+        NINGUNA = 'NNG','Ninguna'
+        ACTIVOCORRIENTE = 'ACTC','Activo Corriente'
+        PASIVOCORRIENTE = 'PSVC','Pasivo Corriente'
+        INVENTARIO = 'INVT','Inventario'
+        ACTIVOSTOTALES = 'ACTV', 'Activo Totales'
+        EFECTIVO = 'EFCT','Efectivo'
+        VALORESCORPLAZO = 'VLRS','Valores a Corto Plazo'
+        COSTODEVENTA = 'CSTDV','Costo de ventas'
+        VENTASNETAS = 'VNTSN','Ventas Netas'
+        COMPRAS = 'CMPRS','Compras'
+        CUENTASPORPAGARCOMERCIALES = 'CNTAPP','Cuentas por pagar comerciales'
+    
 
     codigo = models.CharField(max_length=255,blank=False)
     nombre = models.CharField(max_length=255,blank=False)
@@ -81,6 +96,9 @@ class Cuenta(models.Model):
     subcategoria = models.CharField(max_length=5,
                                     choices=Subcategoria.choices,
                                     default=Subcategoria.NINGUNA)
+    cuenta_ratio = models.CharField(max_length=5,
+                                      choices=CuentaRatio.choices,
+                                      default=CuentaRatio.NINGUNA)
     catalogo = models.ForeignKey(Catalogo,
                                  on_delete=models.CASCADE,
                                  related_name='cuentas')
@@ -128,7 +146,23 @@ class Transaccion (models.Model):
     def __str__(self) -> str:
         return self.descripcion
     
+class Ratio(models.Model):
+    class NombreRatio(models.TextChoices):
+        PRUEBAACIDA = 'PRBCD','Prueba Ácida'
+        ROTAINVENTARIO = 'RTINV','Rotación de inventarios'
+    
+    nombre_ratio = models.CharField(max_length=5,
+                                    choices=NombreRatio.choices,
+                                    default=NombreRatio.PRUEBAACIDA)
+    
+    valor = models.DecimalField(max_digits=9,decimal_places=2,blank=False)
 
+    empresa = models.ForeignKey(Empresa,
+                                on_delete=models.CASCADE,
+                                related_name="ratios")
+    def __str__(self) -> str:
+        return self.nombre_ratio
+    
  
 
 

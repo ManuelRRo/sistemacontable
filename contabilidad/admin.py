@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Cuenta,Transaccion,Empresa,Catalogo,Propietario
+from .models import Cuenta,Transaccion,Empresa,Catalogo,Propietario,Ratio
 
 @admin.register(Cuenta)
 class CuentaAdmin(admin.ModelAdmin):
@@ -21,3 +21,7 @@ class EmpresaAdmin(admin.ModelAdmin):
 @admin.register(Propietario)
 class EmpresaAdmin(admin.ModelAdmin):
     list_display = ['user']
+
+@admin.register(Ratio)
+class RatioAdmin(admin.ModelAdmin):
+    list_display = ['nombre_ratio','empresa','valor']
