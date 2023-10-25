@@ -48,7 +48,6 @@ def cargarBalanceGeneral(request):
 
     try:
         cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
-        print(cuentasActivos)
         for cuenta in cuentasActivos:
             saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
                                                         fecha_creacion__range=(year_1,year_2)
