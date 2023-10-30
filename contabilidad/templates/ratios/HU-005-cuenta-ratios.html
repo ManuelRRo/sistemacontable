@@ -1,0 +1,50 @@
+
+{% extends "layouts/base.html" %}
+{% block title %}Seleccionar Cuentas{% endblock %}
+
+{% block content %}
+<h3>Definir Cuentas para calcular los Ratios</h3>
+<form action="" method="post">
+    <table class="table table-bordered">
+        <thead>
+            <th>Cuenta Ratio</th>
+            <th>Cuenta</th>
+        </thead>
+    
+        <tbody>
+            {% for field in form_as %}
+            <tr>
+                <td >{{ field.label_tag }}</td>
+                <td>{{ field }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Enviar</button>
+    {%csrf_token%}
+</form>
+
+
+
+<hr><hr>
+<hr>
+<hr>
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var select = document.getElementsByTagName('select');
+        console.log(select)
+        Array.from(select).forEach(element => {
+            element.addEventListener('change',function(){
+                let str = 'id_monto'+ element.name.replace(/id/g,"")
+                let monto = document.getElementById(str)
+                monto.textContent = "1000"
+                
+                console.log(monto)
+            })
+        });
+        
+    });
+    </script> -->
+{% endblock %}
+
+
