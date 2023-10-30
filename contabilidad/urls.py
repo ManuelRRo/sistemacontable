@@ -13,7 +13,8 @@ urlpatterns = [
     path('cargaEmpresa/',views.CrearEmpresa,name="cargar-balance"),
     path('estado_resultados/', login_required(views.VerEstadoResultado.as_view()), name="ver_estado_resultado"),
     #HU-05-Definir Cuentas Ratios
-    path('selectRatios/',views.ActualizarCuentasRatios,name="cuentas-ratios"),
+    path('homeRatios/',views.homeRatios,name="home-ratios"),
+    path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
 ]
 
 if settings.DEBUG:

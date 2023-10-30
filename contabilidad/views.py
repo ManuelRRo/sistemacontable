@@ -227,6 +227,9 @@ def CrearEmpresa(request):
         contexto["propietario"] = True
 
     return render(request,'balances/listar-balance.html',contexto)
+#HU HOME RATIOS
+def homeRatios(request):
+    return render(request,'ratios/homeRatios.html')
 
 #HU-005 Definir Cuentas de Ratios
 def actualizarCuentaRatio(primary_key,codigo_ratio):
