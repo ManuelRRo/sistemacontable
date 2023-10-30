@@ -12,34 +12,41 @@
 
     <title>Iniciar sesión</title>
     <link rel="stylesheet" href="{% static "css/login.css" %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static "css/bootstrap.css" %}">
+
+    <!--Cargar la librería de Boxicons-->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
 </head>
 
 <body class="d-flex justify-content-center align-items-center">
-    <div class="shadow p-2 mb-5 col-lg-3 bg-body-tertiary rounded border">
-        <h3>Acceder</h3>
+    <div class="shadow p-4 mb-5 col-lg-4 col-8 bg-body-tertiary rounded-4 border">
+        <h5 class="text-center fw-bold">Iniciar Sesión</h5>
+        <h6>Si aún no te has registrado, puedes hacerlo desde aquí: <a href="{%url 'register'%}" class="mr-4">Regístrate</a></h6>
         <form action="" method="POST">
             {% csrf_token %}
             <div class="mb-4">
                 <label for="exampleInputEmail1" class="form-label">Usuario</label>
 
-                <input type="text" class="form-control form-control-user" id="exampleInputEmail"
+                <input type="text" class="form-control form-control-user rounded-5" id="exampleInputEmail"
                     aria-describedby="emailHelp" placeholder="Ingrese nombre de usuario" name="username">
             </div>
             <div class="mb-4 mr-4">
                 <label for="exampleInputPassword1" class="form-label">Contraseña</label>
                 <div class="form-group" method="post" action="{% url 'login' %}">
-                    <input type="password" class="form-control form-control-user" id="exampleInputPassword"
+                    <input type="password" class="form-control form-control-user rounded-5" id="exampleInputPassword"
                         placeholder="Contraseña" name="password">
 
                 </div>
             </div>
-            
-            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary rounded-5">
+                    <i class='bx bx-log-in'></i>
+                    Iniciar Sesión
+                </button>
+            </div>
         </form>
-        <a href="{%url 'register'%}" class="mr-4">Crear Cuenta</a>
+        
 
     </div>
 
