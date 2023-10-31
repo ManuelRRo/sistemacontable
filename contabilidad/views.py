@@ -295,5 +295,117 @@ class VerEstadoResultado(View):
         
 
         return render(request, self.template_name, context) 
- 
+def funcionRatios(anio,request):
+    propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+    emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    pasivoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="PSVC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    inventario=Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    activosTotales=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTV", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    efectivo=Transaccion.objects.filter(cuenta__cuenta_ratio="EFCT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    valoresCortoPlazo=Transaccion.objects.filter(cuenta__cuenta_ratio="VLRS", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    costoDeVenta=Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    ventasNetas=Transaccion.objects.filter(cuenta__cuenta_ratio="VNTSN", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    cuentasPorPagarComerciales=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    cuentasPorCobrarComerciales=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto    
+    cuentasPorCobrarComercialesAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()  
+    cuentasPorPagarComercialesAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()   
+    inventarioAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio-1).first()
+    compras=Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
     
+    razonCirculante=activoCorriente/pasivoCorriente
+    pruebaAcida=(activoCorriente-inventario)/pasivoCorriente
+    razonCapitalTrabajo=(activoCorriente-pasivoCorriente)/activosTotales
+    razonEfectivo=(efectivo+valoresCortoPlazo)/pasivoCorriente
+    if inventarioAnterior:
+        razonRotacionInventario=costoDeVenta/((inventario+inventarioAnterior.monto)/2)
+        razonDiasInventario=((inventario+inventarioAnterior.monto)/2)/(costoDeVenta/365)
+    else:
+        razonRotacionInventario=costoDeVenta/inventario
+        razonDiasInventario=inventario/(costoDeVenta/365)
+    if cuentasPorCobrarComercialesAnterior:
+        razonRotacionCuentasPorCobrar=ventasNetas/((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)
+        razonPeriodoMedioCobranza=(((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)*365)/ventasNetas
+    else:
+        razonRotacionCuentasPorCobrar=ventasNetas/cuentasPorCobrarComerciales
+        razonPeriodoMedioCobranza=(cuentasPorCobrarComerciales*365)/ventasNetas
+    if cuentasPorPagarComercialesAnterior:
+        razonRotacionCuentasPorPagar=compras/((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)
+        periodoMedioPago=(((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)*365)/compras
+    else:
+        razonRotacionCuentasPorPagar=compras/cuentasPorPagarComerciales
+        periodoMedioPago=(cuentasPorPagarComerciales*365)/compras
+
+    ratios=[
+        {"nombre":"Razón circulante","valor":razonCirculante},
+        {"nombre":"Prueba ácida","valor":pruebaAcida},
+        {"nombre":"Razón de capital de trabajo","valor":razonCapitalTrabajo},
+        {"nombre":"Razón de efectivo","valor":razonEfectivo},
+        {"nombre":"Razón de rotación de inventario","valor":razonRotacionInventario},
+        {"nombre":"Razón de días de inventario","valor":razonDiasInventario},
+        {"nombre":"Razón de rotación de cuentas por cobrar","valor":razonRotacionCuentasPorCobrar},
+        {"nombre":"Razón de período medio de cobranza","valor":razonPeriodoMedioCobranza},
+        {"nombre":"Razón de rotación de cuentas por pagar","valor":razonRotacionCuentasPorPagar},
+        {"nombre":"Período medio de pago","valor":periodoMedioPago}
+    ]
+    return ratios
+
+def calcular_ratios(request):
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+        
+    contexto = {}    
+    totalactivos = 0
+    total = 0
+    year_1 = ""
+    year_2 = ""
+    lista_trans = Transaccion.objects.all()
+   
+    diccionario_cuentas = {}
+    #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
+    if request.method == "POST":
+        year_1 = request.POST['fechainicio']# retorna como anio-mes-dia
+        year_2 = request.POST['fechafinal']# retorna como anio-mes-dia
+    else:
+        year_1 = timezone.now().strftime('%Y-%m-%d')
+        year_2 = timezone.now().strftime('%Y-%m-%d')
+
+    anio=2023
+    ratios=funcionRatios(anio,request)
+    #---------------------------------------------------------   
+    
+    return render(request,"ratios/calcular-ratios.html",{'ratios':ratios})
+
+def asignarCuentasRatios(request):
+
+    valores_de_interes = ['ACTC', 'PSVC', 'INVT', 'ACTV', 'EFCT', 'VLRS', 'CSTDV', 'VNTSN', 'CMPRS', 'CNTAPP', 'CNTAPC']
+    cuentas_de_interes = Cuenta.objects.filter(cuenta_ratio__in=valores_de_interes)
+
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+    cuentas=Cuenta.objects.filter(catalogo=emprsa.catalogo_empresa)
+
+    if request.method=="POST":
+        activosCorrientesId=request.POST.get('activo-corriente')
+        nuevoActivoCorriente=Cuenta.objects.get(id=activosCorrientesId)
+        nuevoActivoCorriente.cuenta_ratio="ACTC"
+        nuevoActivoCorriente.save()
+    return render(request,"ratios/asignar-cuentas-ratios.html",{"cuentas":cuentas,"cuentasI":cuentas_de_interes})

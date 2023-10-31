@@ -86,6 +86,7 @@ class Cuenta(models.Model):
         VENTASNETAS = 'VNTSN','Ventas Netas'
         COMPRAS = 'CMPRS','Compras'
         CUENTASPORPAGARCOMERCIALES = 'CNTAPP','Cuentas por pagar comerciales'
+        CUENTASPORCOBRARCOMERCIALES = 'CNTAPC','Cuentas por cobrar comerciales'
     
 
     codigo = models.CharField(max_length=255,blank=False)
@@ -96,7 +97,7 @@ class Cuenta(models.Model):
     subcategoria = models.CharField(max_length=5,
                                     choices=Subcategoria.choices,
                                     default=Subcategoria.NINGUNA)
-    cuenta_ratio = models.CharField(max_length=5,
+    cuenta_ratio = models.CharField(max_length=6,
                                       choices=CuentaRatio.choices,
                                       default=CuentaRatio.NINGUNA)
     catalogo = models.ForeignKey(Catalogo,

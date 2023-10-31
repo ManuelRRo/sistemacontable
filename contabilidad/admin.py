@@ -4,7 +4,7 @@ from .models import Cuenta,Transaccion,Empresa,Catalogo,Propietario,Ratio
 
 @admin.register(Cuenta)
 class CuentaAdmin(admin.ModelAdmin):
-    list_display = ['codigo','nombre','categoria']
+    list_display = ['codigo','nombre','categoria','cuenta_ratio']
 
 @admin.register(Transaccion)
 class TransaccionAdmin(admin.ModelAdmin):

@@ -1,0 +1,107 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    ANF115 | Asignar cuentas ratios
+{% endblock %}
+
+{% block content %}    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <h4 class="text-center mt-4">titulo</h4>
+    <div class="text-center fw-400 mb-3">
+        Asignar cuentas ratios
+    </div>
+    <div class="table-responsive">
+        {% if cuentasI.filter(cuenta_ratio="ACTC").exists %}
+    <!-- Al menos una cuenta con cuenta_ratio "ACTC" existe en la lista -->
+    j
+{% else %}
+    <!-- Ninguna cuenta con cuenta_ratio "ACTC" existe en la lista -->
+    g
+{% endif %}
+        {{cuentasI}}
+        <form action="" method="POST">
+            {% csrf_token %}
+            <table class="table table-borderless table-hover">
+                <tbody> 
+                    <tr>
+                        <td>Razón de circulante</td>
+                        <td>
+                            <select class="js-example-basic-single" name="activo-corriente" required>
+                                
+                                
+                                {% for cuenta in cuentas %}
+                                    <option value="{{cuenta.id}}">{{cuenta.nombre}}</option>
+                                {% endfor %}
+                              </select>
+                        </td>                                      
+                    </tr> 
+                    <tr>
+                        <td>Razón de circulante</td>
+                        <td>
+                            <select class="js-example-basic-single" name="state">
+                                <option value="AL">Alabama</option>
+                                  
+                                <option value="WY">Wyoming</option>
+                              </select>
+                        </td>                                      
+                    </tr> 
+                </tbody>
+            </table>
+            <button type="submit">Asignar</button>  
+        </form>
+        
+    </div>
+    
+    
+{% endblock %}
+
+{% block filtros%}
+</br>
+<form method="post" onsubmit="return validarFechas()">
+    {% csrf_token %}
+    <label for="fechainicio">Fecha inicial</label><br>
+    <input class="form-control" type="date" id="fechainicio" name="fechainicio" {%if fecha_inicio %} value={{fecha_inicio}} {% endif %} required><br>
+
+    <label for="fechafinal">Fecha final</label><br>
+    <input class="form-control" type="date" id="fechafinal" name="fechafinal" {%if fecha_final %} value={{fecha_final}} {% endif %} required><br>
+    <div class="text-center">
+        <input class="btn btn-dark" type="submit" value="Generar">
+    </div>
+</form>
+</br>
+<script>
+    $(document).ready(function() {
+        $('.js-example-basic-single').select2();
+    });
+    // Obtener el cuadro de búsqueda y el elemento select
+    var input = document.getElementById('myInput');
+        var select = document.getElementById('mySelect');
+
+        // Agregar un evento de escucha para el cuadro de búsqueda
+        input.addEventListener('input', function() {
+            var filter = input.value.toLowerCase(); // Convertir la entrada del usuario a minúsculas
+            for (var i = 0; i < select.options.length; i++) {
+                var option = select.options[i];
+                var optionText = option.text.toLowerCase();
+                if (optionText.indexOf(filter) > -1) {
+                    option.style.display = ''; // Mostrar la opción si coincide con la búsqueda
+                } else {
+                    option.style.display = 'none'; // Ocultar la opción si no coincide con la búsqueda
+                }
+            }
+        });
+
+    function validarFechas() {
+        var fechaInicio = new Date(document.getElementById('fechainicio').value);
+        var fechaFinal = new Date(document.getElementById('fechafinal').value);
+        if (fechaInicio >= fechaFinal) {
+            alert('La fecha inicial debe ser menor que la fecha final');
+            return false;  // Impide que el formulario se envíe
+        }
+
+        return true;  // Permite que el formulario se envíe si las fechas son válidas
+    }
+</script>
+{% endblock %}

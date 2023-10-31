@@ -1,0 +1,60 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    ANF115 | Ratios
+{% endblock %}
+
+{% block content %}    
+
+    
+    <h4 class="text-center mt-4">titulo</h4>
+    <div class="text-center fw-400 mb-3">
+        Ratios
+    </div>
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover">
+            <thead>
+                <th>Nombre</th>
+                <th>Valor</th>
+            </thead>
+            <tbody>
+                {% for ratio in ratios %}
+                <tr>
+                    <td>{{ratio.nombre}}</td>
+                    <td>{{ratio.valor|floatformat:2}}</td>                 
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    
+{% endblock %}
+
+{% block filtros%}
+</br>
+<form method="post" onsubmit="return validarFechas()">
+    {% csrf_token %}
+    <label for="fechainicio">Fecha inicial</label><br>
+    <input class="form-control" type="date" id="fechainicio" name="fechainicio" {%if fecha_inicio %} value={{fecha_inicio}} {% endif %} required><br>
+
+    <label for="fechafinal">Fecha final</label><br>
+    <input class="form-control" type="date" id="fechafinal" name="fechafinal" {%if fecha_final %} value={{fecha_final}} {% endif %} required><br>
+    <div class="text-center">
+        <input class="btn btn-dark" type="submit" value="Generar">
+    </div>
+</form>
+</br>
+<script>
+    function validarFechas() {
+        var fechaInicio = new Date(document.getElementById('fechainicio').value);
+        var fechaFinal = new Date(document.getElementById('fechafinal').value);
+        if (fechaInicio >= fechaFinal) {
+            alert('La fecha inicial debe ser menor que la fecha final');
+            return false;  // Impide que el formulario se envíe
+        }
+
+        return true;  // Permite que el formulario se envíe si las fechas son válidas
+    }
+</script>
+{% endblock %}
