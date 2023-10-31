@@ -5,13 +5,13 @@
 {% endblock %}
 
 {% block content %}    
-
-    
-    <h4 class="text-center mt-4">titulo</h4>
+    {% if ratios %}
+    <h4 class="text-center mt-4">{{empresa}}</h4>
     <div class="text-center fw-400 mb-3">
         Ratios
     </div>
     <div class="table-responsive">
+        
         <table class="table table-borderless table-hover">
             <thead>
                 <th>Nombre</th>
@@ -26,7 +26,9 @@
                 {% endfor %}
             </tbody>
         </table>
+    
     </div>
+    {% endif %}
     
     
 {% endblock %}

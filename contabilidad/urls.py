@@ -13,7 +13,9 @@ urlpatterns = [
     path('cargaEmpresa/',views.CrearEmpresa,name="cargar-balance"),
     path('estado_resultados/', login_required(views.VerEstadoResultado.as_view()), name="ver_estado_resultado"),
     path('calcular_ratios/',views.calcular_ratios,name="calcular_ratios"),
-    path('asignarCuentasRatios',views.asignarCuentasRatios,name="asignarCuentasRatios"),
+    #HU-05-Definir Cuentas Ratios
+    path('homeRatios/',views.homeRatios,name="home-ratios"),
+    path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
 ]
 
 if settings.DEBUG:

@@ -1,115 +1,57 @@
-<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-  <div class="position-sticky pt-3">
-    <ul class="nav flex-column">
-      {% if user.propietario.empresactiva %}
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="{% url 'conta:catalogo' %}">
-          <span><i class="fa-solid fa-house"></i></span>
-          Plan de cuentas
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'conta:transaccion-lista'%}">
-          <span data-feather="file"></span>
-          Balance general
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="shopping-cart"></span>
-          Libro de compras
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="users"></span>
-          Libro de ventas
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'conta:calcular_ratios' %}">
-          <span data-feather="users"></span>
-          Ratios
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'conta:asignarCuentasRatios' %}">
-          <span data-feather="users"></span>
-          Asignar cuentas ratios
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="bar-chart-2"></span>
-          Reports
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="layers"></span>
-          Integrations
-        </a>
-      </li>
-
-    </ul>
-
-    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-      <span>Saved reports</span>
-      <a class="link-secondary" href="#" aria-label="Add a new report">
-        <span data-feather="plus-circle"></span>
+<!-- Sidebar -->
+{% if user.propietario.empresactiva %}
+<div class="sidebar">
+  <a href="{% url "conta:transaccion-lista" %}" class="logo">
+    <i class='bx bx-wallet bx-flashing'></i>
+    <div class="logo-name">Analyti<span>Fin</span></div>
+  </a>
+  <ul class="side-menu">
+    <li class="active">
+      <a href="{% url "conta:transaccion-lista" %}">
+        <i class='bx bxs-dashboard'></i>
+        Inicio
       </a>
-    </h6>
-
-    <ul class="nav flex-column mb-2">
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="file-text"></span>
-          Current month
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="file-text"></span>
-          Last quarter
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="file-text"></span>
-          Social engagement
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="#">
-          <span data-feather="file-text"></span>
-          Year-end sale
-        </a>
-      </li>
-
-    </ul>
-    {% else %}
-    
-    <ul class="nav flex-column mb-2">
-
-      <li class="nav-item">
-        <a class="nav-link" href="{% url "conta:cargar-balance" %}">
-          <span data-feather="file-text"></span>
-          Registrar Empresa
-        </a>
-      </li>
-
-    </ul>
-    {% endif %}
-  </div>
-</nav>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-component'></i>
+        Estados Financieros
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'conta:home-ratios'%}">
+        <i class='bx bx-hive'></i>
+        Ratios Financieros
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-objects-vertical-bottom'></i>        
+        Análisis Vertical
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-objects-horizontal-left' ></i>
+        Análisis Horizontal
+      </a>
+    </li>
+  </ul>
+  <ul class="side-menu">
+    <li>
+      <a href="{% url 'logout'%}" class="logout">
+        <i class="bx fa-solid fa-arrow-right-from-bracket"></i>
+        Cerrar Sesión
+      </a>
+    </li>
+  </ul>
+</div>
+{% else %}
+<div class="sidebar close">
+  <a href="#" class="logo">
+    <i class='bx bx-wallet bx-flashing'></i>
+    <div class="logo-name">Analyti<span>Fin</span></div>
+  </a>
+</div>
+{% endif %}
+<!-- End of Sidebar -->

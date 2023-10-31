@@ -10,17 +10,17 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Iniciar sesión</title>
+    <title>Registrarse</title>
     <link rel="stylesheet" href="{% static "css/login.css" %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static "css/bootstrap.css" %}">
 
 </head>
 
 <body class="d-flex justify-content-center align-items-center">
     
-    <div class="shadow p-2 mb-5 col-lg-3 bg-body-tertiary rounded border">
-        <h5>Crea una Cuenta para tu Empresa</h5>
+    <div class="shadow p-4 mb-5 col-lg-4 col-8 bg-body-tertiary rounded-4 border">
+        <h5 class="text-center fw-bold">Regístrate</h5>
+        <h6>Si ya te has registrado, puedes ingresar desde aquí: <a href="{%url 'login'%}" class="mr-4">Iniciar Sesión</a></h6>
         <form action="" method="POST">
             {% csrf_token %}
             <div class="mb-4">
@@ -50,8 +50,12 @@
                     </ul>
                 {% endif %}
             </div>
-
-            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary rounded-5">
+                    <i class='bx bx-pencil'></i>
+                    Registrarse
+                </button>
+            </div>
         </form>
 
     </div>
