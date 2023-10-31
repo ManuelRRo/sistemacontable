@@ -407,9 +407,10 @@ class VerEstadoResultado(View):
         
 
         return render(request, self.template_name, context) 
-def funcionRatios(anio,request):
+def funcionRatios(anio,request,emprsa):
     propietarioemprsa = get_object_or_404(Propietario,user=request.user)
-    emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+    if emprsa is None:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
     activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
     pasivoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="PSVC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
     inventario=Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
@@ -481,7 +482,7 @@ def calcular_ratios(request):
     if activoCorriente is None:
         ratios=[]
     else:
-        ratios=funcionRatios(anio,request)
+        ratios=funcionRatios(anio,request,None)
             
     #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
     if request.method == "POST":
@@ -491,3 +492,44 @@ def calcular_ratios(request):
         year_1 = timezone.now().strftime('%Y-%m-%d')
         year_2 = timezone.now().strftime('%Y-%m-%d')  
     return render(request,"ratios/calcular-ratios.html",{'ratios':ratios,'empresa':emprsa})
+
+def comparacionRatiosEmpresas(request):
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+
+    anio=2023
+    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first()
+    empresa1 = get_object_or_404(Empresa,id=1)
+    empresa2 = get_object_or_404(Empresa,id=2)
+    ratios1=[]
+    ratios2=[]
+    if activoCorriente is None:
+        ratios1=[]
+        ratios2=[]
+    else:
+        
+        ratios1=funcionRatios(anio,request,empresa1)
+        ratios2=funcionRatios(anio,request,empresa2)
+    
+    promedios=[
+
+    ]
+    for ratio1, ratio2 in zip(ratios1, ratios2):
+        promedio = {
+            'ratio1': ratio1['valor'],
+            'ratio2': ratio2['valor'],
+            'promedio': (ratio1['valor'] + ratio2['valor']) / 2
+        }
+        promedios.append(promedio) 
+    
+    
+    return render(request,"ratios/comparacion-empresas-ratios.html",{'ratios1':ratios1,'ratios2':ratios2,'promedios':promedios,'empresa1':empresa1,'empresa2':empresa2})

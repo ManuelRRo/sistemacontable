@@ -16,6 +16,7 @@ urlpatterns = [
     #HU-05-Definir Cuentas Ratios
     path('homeRatios/',views.homeRatios,name="home-ratios"),
     path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
+    path('comparacion_ratios_empresas/',views.comparacionRatiosEmpresas,name="comparacion-ratios-empresas"),
 ]
 
 if settings.DEBUG:
