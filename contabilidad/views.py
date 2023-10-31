@@ -1,3 +1,4 @@
+
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -5,6 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.views.generic import View
 from django.db.models import Q
+from django.contrib import messages
 
 import pandas
 from django.db.models import Sum
@@ -12,7 +14,59 @@ from decimal import Decimal
 
 from .forms import CatalagoForm,EmpresaForm
 from .models import Catalogo, Transaccion,Cuenta,Propietario,Empresa
-from datetime import datetime
+from datetime import date, datetime
+import plotly.express as px
+import pandas as pd
+import base64
+import io
+from asgiref.sync import sync_to_async
+import plotly.graph_objects as go
+
+
+#HU-19-Grafico de variacion
+@sync_to_async
+def grafico_var(request):
+    try:
+        user = request.user
+        propietario = Propietario.objects.get(user=user)
+        empresa = Empresa.objects.get(propietario=propietario)
+        cuentas_balance = Cuenta.objects.filter(categoria__in=['ASV', 'PSV', 'PTR'], catalogo=empresa.catalogo_empresa)
+        
+        if request.method == "POST":
+            fecha_inicio = request.POST['fechainicio']
+            fecha_final = request.POST['fechafinal']
+            año_inicio, mes_inicio, dia_inicio = map(int, fecha_inicio.split('-'))
+            año_final, mes_final, dia_final = map(int, fecha_final.split('-'))
+            
+            seleccionada = request.POST['cuenta']
+            cuenta = Cuenta.objects.get(id=seleccionada)
+            
+            saldos = []
+            for año in range(año_inicio, año_final + 1):
+                fecha_in = date(año, mes_inicio, dia_inicio)
+                fecha_end = date(año, mes_final, dia_final)
+                saldo = Transaccion.objects.filter(cuenta=seleccionada, fecha_creacion__range=[fecha_in, fecha_end]).aggregate(Sum('monto'))
+                saldos.append((año, saldo))
+                
+            años = [año for año, _ in saldos]
+            saldos = [saldo['monto__sum'] for _, saldo in saldos]
+            
+            fig = px.line(pd.DataFrame({'Año': años, 'Saldo': saldos}), x="Año", y="Saldo", title=f"Cuenta de <b>{cuenta.nombre}</b>, período <b>{año_inicio} - {año_final}</b>")
+            fig.update_layout(width=1000, height=600)
+            
+            años_con_saldos = [año for año, saldo in zip(años, saldos) if saldo is not None]
+            fig.add_trace(go.Scatter(x=años_con_saldos, y=[saldos[años.index(año)] for año in años_con_saldos], mode='markers', marker=dict(size=10, color='red'), name='valores'))
+            fig.update_xaxes(tickmode='array', tickvals=años, ticktext=[str(año) for año in range(año_inicio, año_final + 1)])
+            grafico_var = fig.to_html(full_html=False, include_plotlyjs='cdn')
+            mostrarGrafico = True
+        else:
+            mostrarGrafico = False
+            grafico_var = None
+    except Exception as e:
+        messages.error(request, f'Error al generar el gráfico')
+        return render(request, 'graficos/variacion_cuenta.html', {'cuentas_balance': cuentas_balance})
+    
+    return render(request, 'graficos/variacion_cuenta.html', {'cuentas_balance': cuentas_balance, 'mostrarGrafico': mostrarGrafico, 'grafico_var': grafico_var})
 
 #HU-24-Listar balance general
 @login_required()
