@@ -64,71 +64,6 @@ def grafico_var(request):
     
     return render(request, 'graficos/variacion_cuenta.html', {'cuentas_balance': cuentas_balance, 'mostrarGrafico': mostrarGrafico, 'grafico_var': grafico_var})
 
-#HU-24-Listar balance general
-@login_required()
-def cargarBalanceGeneral(request):
-    usuario = request.user
-    try:
-        propietarioemprsa = get_object_or_404(Propietario,user=usuario)
-
-    except:
-        print("No hay propietario")
-
-    try:
-        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
-        
-    except:
-        print("No tiene empresa registrada")
-        
-    contexto = {}    
-    totalactivos = 0
-    total = 0
-    year_1 = ""
-    year_2 = ""
-    lista_trans = Transaccion.objects.all()
-   
-    diccionario_cuentas = {}
-    #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
-    if request.method == "POST":
-        year_1 = request.POST['fechainicio']# retorna como anio-mes-dia
-        year_2 = request.POST['fechafinal']# retorna como anio-mes-dia
-    else:
-        year_1 = timezone.now().strftime('%Y-%m-%d')
-        year_2 = timezone.now().strftime('%Y-%m-%d')
-
-    try:
-        cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
-        print(cuentasActivos)
-        for cuenta in cuentasActivos:
-            saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
-                                                        fecha_creacion__range=(year_1,year_2)
-                                                    ).aggregate(total=Sum('monto'))
-            saldoDebito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
-                                                        fecha_creacion__range=(year_1,year_2)
-                                                    ).aggregate(total=Sum('monto'))
-            if saldoCredito["total"] is None:
-                saldoCredito["total"] = Decimal(0.0)
-            if saldoDebito["total"] is None:
-                saldoDebito["total"] = Decimal(0.0)
-            total = saldoDebito["total"] - saldoCredito["total"]
-            totalactivos += total 
-
-            diccionario_cuentas[cuenta] = {
-            'saldo_credito': saldoCredito["total"],
-            'saldo_debito': saldoDebito["total"],
-            'total': total
-            }
-
-            contexto = {'cuentasActivos': cuentasActivos,
-                'totalActivos': total,
-                'diccionario_cuentas':diccionario_cuentas,
-                'pathbase':settings.BASE_DIR,}
-    except:
-        print("No tiene empresa registrada aun")
-
-    return render(request,
-           'transacciones/lista.html'
-           ,contexto)
 
 #HU-002-Registrar empresa con catálogo, BGN Y ERS en formato excel
 def CrearEmpresa(request):
@@ -290,7 +225,7 @@ def actualizarCuentaRatio(primary_key,codigo_ratio):
 def ActualizarCuentasRatios(request):
     context = {}
     lista = []
-    codigo_ratios = Cuenta.CuentaRatio.values
+    codigo_ratios = Cuenta.CuentaRatio.values[1:]
     cuenta_= request.POST 
     id_ratios_vistos = set()
     #print(request.POST)
@@ -311,7 +246,6 @@ def ActualizarCuentasRatios(request):
                 
             for cuenta, codigo_ratio in zip(cuenta_, codigo_ratios):
                 if cuenta != "csrfmiddlewaretoken":
-                    if codigo_ratio != 'NNG':
                             actualizarCuentaRatio(request.POST.get(cuenta),codigo_ratio).save()
                         
     
