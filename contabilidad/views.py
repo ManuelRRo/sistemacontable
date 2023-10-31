@@ -7,18 +7,14 @@ from django.utils import timezone
 from django.views.generic import View
 from django.db.models import Q
 from django.contrib import messages
-
 import pandas
 from django.db.models import Sum
 from decimal import Decimal
-
-from .forms import CatalagoForm,EmpresaForm
-from .models import Catalogo, Transaccion,Cuenta,Propietario,Empresa
-from datetime import date, datetime
+from .forms import CatalagoForm,EmpresaForm,ActivoCorrienteForm
+from .models import Catalogo, Transaccion,Cuenta,Propietario,Empresa,Ratio
+from datetime import datetime,date
 import plotly.express as px
 import pandas as pd
-import base64
-import io
 from asgiref.sync import sync_to_async
 import plotly.graph_objects as go
 
@@ -175,6 +171,10 @@ def CrearEmpresa(request):
             hoja_bgn = pandas.read_excel(path,sheet_name="BGN")
             balance = {}
 
+            #Crear Cuentas de Ratios
+            for ratio in Ratio.NombreRatio.choices:
+                print(ratio)
+
             lista_anios = [hoja_bgn.columns[2], hoja_bgn.columns[3], hoja_bgn.columns[4]]
             
             for index, row in hoja_bgn.iterrows():
@@ -277,6 +277,48 @@ def CrearEmpresa(request):
         contexto["propietario"] = True
 
     return render(request,'balances/listar-balance.html',contexto)
+#HU HOME RATIOS
+def homeRatios(request):
+    return render(request,'ratios/homeRatios.html')
+
+#HU-005 Definir Cuentas de Ratios
+def actualizarCuentaRatio(primary_key,codigo_ratio):
+    objeto = Cuenta.objects.get(pk=primary_key)
+    objeto.cuenta_ratio = codigo_ratio
+    return objeto
+
+def ActualizarCuentasRatios(request):
+    context = {}
+    lista = []
+    codigo_ratios = Cuenta.CuentaRatio.values
+    cuenta_= request.POST 
+    id_ratios_vistos = set()
+    #print(request.POST)
+
+    if request.method == 'POST':
+        if len(cuenta_) != 0 :
+            for nombre_ratio, id_ratio in cuenta_.items():
+                # Ignorar el csrfmiddlewaretoken
+                if nombre_ratio != 'csrfmiddlewaretoken':
+                    # Verificar si el ID de ratio ya fue visto
+                    if id_ratio in id_ratios_vistos:
+                        context["form_as"] = ActivoCorrienteForm(request_=request,user=None)
+                        #print("Formulario en contexto:", context.get("form_as"))
+                        return render(request,'ratios/HU-005-cuenta-ratios.html',context)
+                    else:
+                        # Agregar el ID de ratio al conjunto
+                        id_ratios_vistos.add(id_ratio)
+                
+            for cuenta, codigo_ratio in zip(cuenta_, codigo_ratios):
+                if cuenta != "csrfmiddlewaretoken":
+                    if codigo_ratio != 'NNG':
+                            actualizarCuentaRatio(request.POST.get(cuenta),codigo_ratio).save()
+                        
+    
+    context["form_as"] = ActivoCorrienteForm(request_=request,user=request.user)
+    #Crear Cuentas de Ratios
+    return render(request,'ratios/HU-005-cuenta-ratios.html',context)
+
 
 #HU-023-Listar Cuentas del Catalogo
 def ListarCatalogo(request):
@@ -286,6 +328,72 @@ def ListarCatalogo(request):
     except:
         print("No hay catalogo")
     return render(request,'catalogo/listar-catalogo.html',{'catalogo':catalogo})
+
+#HU-24-Listar balance general
+@login_required()
+def cargarBalanceGeneral(request):
+    usuario = request.user
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=usuario)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+        
+    contexto = {}    
+    totalactivos = 0
+    total = 0
+    year_1 = ""
+    year_2 = ""
+    lista_trans = Transaccion.objects.all()
+   
+    diccionario_cuentas = {}
+    #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
+    if request.method == "POST":
+        year_1 = request.POST['fechainicio']# retorna como anio-mes-dia
+        year_2 = request.POST['fechafinal']# retorna como anio-mes-dia
+    else:
+        year_1 = timezone.now().strftime('%Y-%m-%d')
+        year_2 = timezone.now().strftime('%Y-%m-%d')
+
+    try:
+        cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
+        print(cuentasActivos)
+        for cuenta in cuentasActivos:
+            saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
+                                                        fecha_creacion__range=(year_1,year_2)
+                                                    ).aggregate(total=Sum('monto'))
+            saldoDebito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
+                                                        fecha_creacion__range=(year_1,year_2)
+                                                    ).aggregate(total=Sum('monto'))
+            if saldoCredito["total"] is None:
+                saldoCredito["total"] = Decimal(0.0)
+            if saldoDebito["total"] is None:
+                saldoDebito["total"] = Decimal(0.0)
+            total = saldoDebito["total"] - saldoCredito["total"]
+            totalactivos += total 
+
+            diccionario_cuentas[cuenta] = {
+            'saldo_credito': saldoCredito["total"],
+            'saldo_debito': saldoDebito["total"],
+            'total': total
+            }
+
+            contexto = {'cuentasActivos': cuentasActivos,
+                'totalActivos': total,
+                'diccionario_cuentas':diccionario_cuentas,
+                'pathbase':settings.BASE_DIR,}
+    except:
+        print("No tiene empresa registrada aun")
+
+    return render(request,
+           'transacciones/lista.html'
+           ,contexto)
 
 #HU-25-Listar Estados de Resultado
 # Mostrar Estados de Resultados 
@@ -349,5 +457,129 @@ class VerEstadoResultado(View):
         
 
         return render(request, self.template_name, context) 
- 
+def funcionRatios(anio,request,emprsa):
+    propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+    if emprsa is None:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    pasivoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="PSVC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    inventario=Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    activosTotales=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTV", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    efectivo=Transaccion.objects.filter(cuenta__cuenta_ratio="EFCT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    valoresCortoPlazo=Transaccion.objects.filter(cuenta__cuenta_ratio="VLRS", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    costoDeVenta=Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    ventasNetas=Transaccion.objects.filter(cuenta__cuenta_ratio="VNTSN", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    cuentasPorPagarComerciales=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    cuentasPorCobrarComerciales=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto    
+    cuentasPorCobrarComercialesAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()  
+    cuentasPorPagarComercialesAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()   
+    inventarioAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio-1).first()
+    compras=Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
     
+    razonCirculante=activoCorriente/pasivoCorriente
+    pruebaAcida=(activoCorriente-inventario)/pasivoCorriente
+    razonCapitalTrabajo=(activoCorriente-pasivoCorriente)/activosTotales
+    razonEfectivo=(efectivo+valoresCortoPlazo)/pasivoCorriente
+    if inventarioAnterior:
+        razonRotacionInventario=costoDeVenta/((inventario+inventarioAnterior.monto)/2)
+        razonDiasInventario=((inventario+inventarioAnterior.monto)/2)/(costoDeVenta/365)
+    else:
+        razonRotacionInventario=costoDeVenta/inventario
+        razonDiasInventario=inventario/(costoDeVenta/365)
+    if cuentasPorCobrarComercialesAnterior:
+        razonRotacionCuentasPorCobrar=ventasNetas/((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)
+        razonPeriodoMedioCobranza=(((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)*365)/ventasNetas
+    else:
+        razonRotacionCuentasPorCobrar=ventasNetas/cuentasPorCobrarComerciales
+        razonPeriodoMedioCobranza=(cuentasPorCobrarComerciales*365)/ventasNetas
+    if cuentasPorPagarComercialesAnterior:
+        razonRotacionCuentasPorPagar=compras/((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)
+        periodoMedioPago=(((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)*365)/compras
+    else:
+        razonRotacionCuentasPorPagar=compras/cuentasPorPagarComerciales
+        periodoMedioPago=(cuentasPorPagarComerciales*365)/compras
+
+    ratios=[
+        {"nombre":"Razón circulante","valor":razonCirculante},
+        {"nombre":"Prueba ácida","valor":pruebaAcida},
+        {"nombre":"Razón de capital de trabajo","valor":razonCapitalTrabajo},
+        {"nombre":"Razón de efectivo","valor":razonEfectivo},
+        {"nombre":"Razón de rotación de inventario","valor":razonRotacionInventario},
+        {"nombre":"Razón de días de inventario","valor":razonDiasInventario},
+        {"nombre":"Razón de rotación de cuentas por cobrar","valor":razonRotacionCuentasPorCobrar},
+        {"nombre":"Razón de período medio de cobranza","valor":razonPeriodoMedioCobranza},
+        {"nombre":"Razón de rotación de cuentas por pagar","valor":razonRotacionCuentasPorPagar},
+        {"nombre":"Período medio de pago","valor":periodoMedioPago}
+    ]
+    return ratios
+
+def calcular_ratios(request):
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+    
+    anio=2023
+    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first()
+    
+    if activoCorriente is None:
+        ratios=[]
+    else:
+        ratios=funcionRatios(anio,request,None)
+            
+    #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
+    if request.method == "POST":
+        year_1 = request.POST['fechainicio']# retorna como anio-mes-dia
+        year_2 = request.POST['fechafinal']# retorna como anio-mes-dia
+    else:
+        year_1 = timezone.now().strftime('%Y-%m-%d')
+        year_2 = timezone.now().strftime('%Y-%m-%d')  
+    return render(request,"ratios/calcular-ratios.html",{'ratios':ratios,'empresa':emprsa})
+
+def comparacionRatiosEmpresas(request):
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+
+    anio=2023
+    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first()
+    empresa1 = get_object_or_404(Empresa,id=1)
+    empresa2 = get_object_or_404(Empresa,id=2)
+    ratios1=[]
+    ratios2=[]
+    if activoCorriente is None:
+        ratios1=[]
+        ratios2=[]
+    else:
+        
+        ratios1=funcionRatios(anio,request,empresa1)
+        ratios2=funcionRatios(anio,request,empresa2)
+    
+    promedios=[
+
+    ]
+    for ratio1, ratio2 in zip(ratios1, ratios2):
+        promedio = {
+            'ratio1': ratio1['valor'],
+            'ratio2': ratio2['valor'],
+            'promedio': (ratio1['valor'] + ratio2['valor']) / 2
+        }
+        promedios.append(promedio) 
+    
+    
+    return render(request,"ratios/comparacion-empresas-ratios.html",{'ratios1':ratios1,'ratios2':ratios2,'promedios':promedios,'empresa1':empresa1,'empresa2':empresa2})

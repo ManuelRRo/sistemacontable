@@ -1,20 +1,44 @@
-<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-
-    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">{{user.propietario.empresa.nombre_empresa}}</a>
-
-    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
-        data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
-
-    <div class="navbar-nav">
-
-        <div class="nav-item text-nowrap">
-            <a class="nav-link px-3" href="{% url 'logout'%}">Sign out</a>
-        </div>
-        
-    </div>
-
-</header>
+<!-- Navbar -->
+<nav class="justify-content-between">
+    <ul class="nav">
+        <i class='bx bx-menu'></i>
+    </ul>
+    <ul class="nav align-items-center">
+        {% if not user.propietario.empresactiva %}
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url "conta:cargar-balance" %}">
+                <i class="fa-solid fa-file-pen"></i>
+                Empresa
+            </a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'conta:catalogo' %}">
+                <i class="fa-regular fa-file-lines"></i>
+                Catalogo de Cuentas
+            </a>
+        </li>
+        {% endif %}
+        <input type="checkbox" id="theme-toggle" hidden>
+        <label for="theme-toggle" class="theme-toggle"></label>
+        <li class="dropdown"> 
+            <a href="#" class="profile" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class='bx-perfil bx bxs-user-circle' ></i>
+            </a>
+            <ul class="dropdown-menu">
+                <li class="text-end">
+                    <h4 class="dropdown-header fw-bold">{{user.username}}</h4>
+                    <h4 class="dropdown-header">{{user.email}}</h4>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'logout'%}">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        Cerrar Sesión
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<!-- End of Navbar -->
