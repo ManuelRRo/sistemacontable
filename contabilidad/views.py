@@ -13,56 +13,17 @@ from decimal import Decimal
 from .forms import CatalagoForm,EmpresaForm,ActivoCorrienteForm
 from .models import Catalogo, Transaccion,Cuenta,Propietario,Empresa,Ratio
 from datetime import datetime,date
+import matplotlib
+matplotlib.use('Agg')
 import plotly.express as px
 import pandas as pd
+import os
 from asgiref.sync import sync_to_async
 import plotly.graph_objects as go
-
-
-#HU-19-Grafico de variacion
-@sync_to_async
-def grafico_var(request):
-    try:
-        user = request.user
-        propietario = Propietario.objects.get(user=user)
-        empresa = Empresa.objects.get(propietario=propietario)
-        cuentas_balance = Cuenta.objects.filter(categoria__in=['ASV', 'PSV', 'PTR'], catalogo=empresa.catalogo_empresa)
-        
-        if request.method == "POST":
-            fecha_inicio = request.POST['fechainicio']
-            fecha_final = request.POST['fechafinal']
-            año_inicio, mes_inicio, dia_inicio = map(int, fecha_inicio.split('-'))
-            año_final, mes_final, dia_final = map(int, fecha_final.split('-'))
-            
-            seleccionada = request.POST['cuenta']
-            cuenta = Cuenta.objects.get(id=seleccionada)
-            
-            saldos = []
-            for año in range(año_inicio, año_final + 1):
-                fecha_in = date(año, mes_inicio, dia_inicio)
-                fecha_end = date(año, mes_final, dia_final)
-                saldo = Transaccion.objects.filter(cuenta=seleccionada, fecha_creacion__range=[fecha_in, fecha_end]).aggregate(Sum('monto'))
-                saldos.append((año, saldo))
-                
-            años = [año for año, _ in saldos]
-            saldos = [saldo['monto__sum'] for _, saldo in saldos]
-            
-            fig = px.line(pd.DataFrame({'Año': años, 'Saldo': saldos}), x="Año", y="Saldo", title=f"Cuenta de <b>{cuenta.nombre}</b>, período <b>{año_inicio} - {año_final}</b>")
-            fig.update_layout(width=1000, height=600)
-            
-            años_con_saldos = [año for año, saldo in zip(años, saldos) if saldo is not None]
-            fig.add_trace(go.Scatter(x=años_con_saldos, y=[saldos[años.index(año)] for año in años_con_saldos], mode='markers', marker=dict(size=10, color='red'), name='valores'))
-            fig.update_xaxes(tickmode='array', tickvals=años, ticktext=[str(año) for año in range(año_inicio, año_final + 1)])
-            grafico_var = fig.to_html(full_html=False, include_plotlyjs='cdn')
-            mostrarGrafico = True
-        else:
-            mostrarGrafico = False
-            grafico_var = None
-    except Exception as e:
-        messages.error(request, f'Error al generar el gráfico')
-        return render(request, 'graficos/variacion_cuenta.html', {'cuentas_balance': cuentas_balance})
-    
-    return render(request, 'graficos/variacion_cuenta.html', {'cuentas_balance': cuentas_balance, 'mostrarGrafico': mostrarGrafico, 'grafico_var': grafico_var})
+import matplotlib.pyplot as plt
+from plotly.io import to_image
+from io import BytesIO
+import base64
 
 
 #HU-002-Registrar empresa con catálogo, BGN Y ERS en formato excel
@@ -252,8 +213,123 @@ def ActualizarCuentasRatios(request):
     context["form_as"] = ActivoCorrienteForm(request_=request,user=request.user)
     #Crear Cuentas de Ratios
     return render(request,'ratios/HU-005-cuenta-ratios.html',context)
+#HU-19-Grafico de variacion
 
+def grafico_var(request):
+    try:
+        user = request.user
+        propietario = Propietario.objects.get(user=user)
+        empresa = Empresa.objects.get(propietario=propietario)
+        cuentas_balance = Cuenta.objects.filter(categoria__in=['ASV', 'PSV', 'PTR'], catalogo=empresa.catalogo_empresa)
+        
+        if request.method == "POST":
+            fecha_inicio = request.POST['fechainicio']
+            fecha_final = request.POST['fechafinal']
+            año_inicio, mes_inicio, dia_inicio = map(int, fecha_inicio.split('-'))
+            año_final, mes_final, dia_final = map(int, fecha_final.split('-'))
+            
+            seleccionada = request.POST['cuenta']
+            cuenta = Cuenta.objects.get(id=seleccionada)
+        
 
+            saldos = []
+            for año in range(año_inicio, año_final + 1):
+                fecha_in = date(año, mes_inicio, dia_inicio)
+                fecha_end = date(año, mes_final, dia_final)
+                saldo = Transaccion.objects.filter(cuenta=seleccionada, fecha_creacion__range=[fecha_in, fecha_end]).aggregate(Sum('monto'))
+                saldos.append((año, saldo))
+                
+            años = [año for año, _ in saldos]
+            saldos = [saldo['monto__sum'] for _, saldo in saldos]
+            
+            fig = px.line(pd.DataFrame({'Año': años, 'Saldo': saldos}), x="Año", y="Saldo", title=f"Cuenta de <b>{cuenta.nombre}</b>, período <b>{año_inicio} - {año_final}</b>")
+            fig.update_layout(width=1000, height=600)
+            
+            años_con_saldos = [año for año, saldo in zip(años, saldos) if saldo is not None]
+            fig.add_trace(go.Scatter(x=años_con_saldos, y=[saldos[años.index(año)] for año in años_con_saldos], mode='markers', marker=dict(size=10, color='red'), name='valores'))
+            fig.update_xaxes(tickmode='array', tickvals=años, ticktext=[str(año) for año in range(año_inicio, año_final + 1)])
+            grafico_var = fig.to_html(full_html=False, include_plotlyjs='cdn')
+            mostrarGrafico = True
+        else:
+            mostrarGrafico = False
+            grafico_var = None
+    except Exception as e:
+        messages.error(request, f'Error al generar el gráfico')
+        return render(request, 'graficos/variacion_cuenta.html', {'cuentas_balance': cuentas_balance})
+    
+    return render(request, 'graficos/variacion_cuenta.html', {'cuentas_balance': cuentas_balance, 'mostrarGrafico': mostrarGrafico, 'grafico_var': grafico_var})
+@sync_to_async
+def graficoRatios(request):
+    try:
+        mostrarGrafico = False
+        figs = []
+        usuario = request.user
+        try:
+            propietarioemprsa = get_object_or_404(Propietario, user=usuario)
+        except:
+            messages.error(request, "No hay propietario registrado")
+            return render(request, 'graficos/ratios.html', {'ratios': ratios})
+        try:
+            emprsa = get_object_or_404(Empresa, propietario=propietarioemprsa)
+        except:
+            messages.error(request, "No hay empresa registrada")
+            return render(request, 'graficos/ratios.html', {'ratios': ratios})
+        anio = 2023
+        ratios = funcionRatios(anio, request, emprsa)
+        data = []
+        anios = []
+        if request.method == 'POST':
+            mostrarGrafico = True
+            ratios_seleccionados = request.POST.getlist("ratios")
+            fecha_inicio = request.POST.get("fechainicio")
+            fecha_final = request.POST.get("fechafinal")
+            try:
+                año_inicio, mes_inicio, dia_inicio = map(int, fecha_inicio.split('-'))
+                año_final, mes_final, dia_final = map(int, fecha_final.split('-'))
+            except:
+                messages.error(request, "Seleccione fechas válidas")
+                return render(request, 'graficos/ratios.html', {'ratios': ratios})
+            if len(ratios_seleccionados) < 5:
+                messages.error(request, "Se deben seleccionar al menos 5 ratios")
+                return render(request, 'graficos/ratios.html', {'ratios': ratios})
+            if año_final - año_inicio < 2:
+                messages.error(request, "El rango de fechas debe ser de al menos 3 año")
+                return render(request, 'graficos/ratios.html', {'ratios': ratios})   
+            for anio in range(año_inicio, año_final + 1):
+                ratios = funcionRatios(anio, request, emprsa)
+                data.append({"anio": anio, "ratios": ratios})
+                anios.append(anio)
+            for i, ratio in enumerate(data[0]['ratios']):
+                if(ratio['nombre'] not in ratios_seleccionados):
+                    continue
+                ratio_nombre = ratio['nombre']
+                fig, ax = plt.subplots()
+                anios_data = [anio_data['anio'] for anio_data in data]
+                valores = [float(anio_data['ratios'][i]['valor']) for anio_data in data]
+                for anio, valor in zip(anios_data, valores):
+                    ax.annotate(f'{valor:.2f}', (anio, valor), textcoords="offset points", xytext=(5, 10), ha='center')
+                for anio_data in data:
+                    anio = anio_data['anio']
+                    valor = float(anio_data['ratios'][i]['valor'])
+                    ax.plot(anio,valor,marker='o', label=str(anio))
+                ax.plot([anio_data['anio'] for anio_data in data], [float(anio_data['ratios'][i]['valor']) for anio_data in data],color='black', linestyle='-')
+                ax.set_xlabel('Año')
+                ax.set_ylabel('Valor')
+                ax.set_title('Ratio De '+ ratio_nombre +' Periodo ' + str(año_inicio) + ' - ' + str(año_final))
+                ax.legend()
+                ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+                buffer = BytesIO()
+                plt.savefig(buffer, format='png')
+                buffer.seek(0)
+                image_base64 = base64.b64encode(buffer.read()).decode()
+                plt.close() 
+                figs.append({'nombre': ratio_nombre, 'imagen_base64': f"data:image/png;base64,{image_base64}"})
+            return render(request, 'graficos/ratios.html', {'ratios': ratios, 'graficos': figs, 'mostrarGrafico': mostrarGrafico})
+    except:
+        messages.error(request, "Error al generar los gráficos, Verifique haber definido las cuentas para los ratios, y que existan saldos en el periodo seleccionado")
+        return render(request, 'graficos/ratios.html', {'ratios': ratios})
+
+    return render(request, 'graficos/ratios.html', {'ratios': ratios})
 #HU-023-Listar Cuentas del Catalogo
 def ListarCatalogo(request):
     catalogo = {}

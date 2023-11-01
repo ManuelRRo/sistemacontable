@@ -1,0 +1,50 @@
+{% extends "layouts/base.html" %}
+{% block title %}Gráfico de Ratios{% endblock %}
+
+{% block content %}
+<form method="post" action="{% url 'conta:grafico_ratios' %}">
+    {% csrf_token %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-danger" role="alert">
+          {{message}}
+        </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-7 border border-dark ">
+            <h3 class="text-center">Ratios Disponibles</h3>
+            {% for ratio in ratios %}
+                <div class="row p-1">
+                    <div class="form-check">
+                        <input class="form-check-input border border-dark p-2" type="checkbox" value="{{ ratio.nombre }}" name="ratios" id="flexCheckDefault">
+                        <label class="form-check-label" for="flexCheckDefault">
+                            {{ ratio.nombre }}
+                        </label>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="col-2">
+            <label for="fechainicio">Fecha inicial</label><br>
+            <input type="date" id="fechainicio" name="fechainicio"><br>
+            <label for="fechafinal">Fecha final</label><br>
+            <input type="date" id="fechafinal" name="fechafinal"><br>
+            <button type="submit" class="btn btn-primary mt-4">Mostrar Graficos</button>
+        </div>
+    </div>
+</form>
+{% if mostrarGrafico %}
+<div class="row mt-4">
+    {% for grafico in graficos %}
+    <div class="col-md-12 mt-4">
+        <div class="animate__animated animate__fadeIn">
+            <img src="{{ grafico.imagen_base64 }}" alt="Gráfico" width="100%">
+        </div>
+
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

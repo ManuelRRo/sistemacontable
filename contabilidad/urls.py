@@ -18,6 +18,7 @@ urlpatterns = [
     path('homeRatios/',views.homeRatios,name="home-ratios"),
     path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
     path('comparacion_ratios_empresas/',views.comparacionRatiosEmpresas,name="comparacion-ratios-empresas"),
+    path('grafico_ratios/',views.graficoRatios,name="grafico_ratios"),
 ]
 
 if settings.DEBUG:
