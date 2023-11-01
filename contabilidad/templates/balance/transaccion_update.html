@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+{% block title %}Transacciones{% endblock %}
+
+{% block content %}
+{% if user.propietario.empresactiva %}
+<h1>Actualizar monto cuenta</h1>
+
+<form action="" method="post">
+    <table class="table table-bordered">
+        <thead>
+            <th>{{form.cuenta.label}}</th>
+            <!-- <th>Debe</th>
+            <th>Haber</th> -->
+            <th>{{form.monto.label}}</th>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td>
+                    {{nombre_cuenta}}
+                    {{form.cuenta}}
+                </td>
+                <td>
+                    {{form.monto}}
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{%url 'conta:transaccion-lista'%}" class="btn btn-danger">Cancelar</a>
+</form>
+
+{% else %}
+
+<h1>Debe registrar su empresa</h1>
+
+{% endif %}
+
+{% endblock %}

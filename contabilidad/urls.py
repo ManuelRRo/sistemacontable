@@ -9,6 +9,7 @@ app_name = 'conta'
 
 urlpatterns = [
     path('',views.cargarBalanceGeneral,name="transaccion-lista"),
+    path('balance/actualizar-monto/<int:id_cuenta>',views.TransaccionUpdateView.as_view(),name="actualizar-monto"),
     path('catalogo/',views.ListarCatalogo,name="catalogo"),
     path('cargaEmpresa/',views.CrearEmpresa,name="cargar-balance"),
     path('estado_resultados/', login_required(views.VerEstadoResultado.as_view()), name="ver_estado_resultado"),
