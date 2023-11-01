@@ -1,4 +1,5 @@
-
+from django.views.generic import UpdateView
+from django.urls import reverse_lazy
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -10,7 +11,7 @@ from django.contrib import messages
 import pandas
 from django.db.models import Sum
 from decimal import Decimal
-from .forms import CatalagoForm,EmpresaForm,ActivoCorrienteForm
+from .forms import CatalagoForm,EmpresaForm,ActivoCorrienteForm,UpdateTransaccionForm
 from .models import Catalogo, Transaccion,Cuenta,Propietario,Empresa,Ratio
 from datetime import datetime,date
 import matplotlib
@@ -37,7 +38,7 @@ def CrearEmpresa(request):
         print("No tiene Propietario Asignado")
         contexto = {}
         contexto["propietario"] = False
-        return render(request,'balances/listar-balance.html',contexto)
+        return render(request,'empresa/crear-empresa.html',contexto)
 
     if request.method == 'POST':
 
@@ -172,7 +173,7 @@ def CrearEmpresa(request):
         contexto["empresa_form"] = empresa_form 
         contexto["propietario"] = True
 
-    return render(request,'balances/listar-balance.html',contexto)
+    return render(request,'empresa/crear-empresa.html',contexto)
 #HU HOME RATIOS
 def homeRatios(request):
     return render(request,'ratios/homeRatios.html')
@@ -352,7 +353,9 @@ def cargarBalanceGeneral(request):
     try:
         emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
         
-    except:
+    except Exception as e:
+        error_message = f"Se produjo una excepción: {str(e)}"
+        print(error_message)
         print("No tiene empresa registrada")
         
     contexto = {}    
@@ -372,39 +375,93 @@ def cargarBalanceGeneral(request):
         year_2 = timezone.now().strftime('%Y-%m-%d')
 
     try:
-        cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
-        print(cuentasActivos)
-        for cuenta in cuentasActivos:
-            saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
-                                                        fecha_creacion__range=(year_1,year_2)
-                                                    ).aggregate(total=Sum('monto'))
-            saldoDebito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
-                                                        fecha_creacion__range=(year_1,year_2)
-                                                    ).aggregate(total=Sum('monto'))
-            if saldoCredito["total"] is None:
-                saldoCredito["total"] = Decimal(0.0)
-            if saldoDebito["total"] is None:
-                saldoDebito["total"] = Decimal(0.0)
-            total = saldoDebito["total"] - saldoCredito["total"]
-            totalactivos += total 
-
-            diccionario_cuentas[cuenta] = {
-            'saldo_credito': saldoCredito["total"],
-            'saldo_debito': saldoDebito["total"],
-            'total': total
-            }
-
-            contexto = {'cuentasActivos': cuentasActivos,
-                'totalActivos': total,
-                'diccionario_cuentas':diccionario_cuentas,
-                'pathbase':settings.BASE_DIR,}
-    except:
-        print("No tiene empresa registrada aun")
-
+        contexto = sumarTransacciones(request)
+        print("contexto_)sumas",contexto)
+    except Exception as e:
+        error_message = f"Se produjo una excepción: {str(e)}"
+        print(error_message)
+        print("Problema en sumarTrasnsacciones")
+    
+    year_1 = timezone.now().year
+    year_2 = timezone.now().year
+    try:
+        contexto = sumarTransacciones(request,op=0)
+    except Exception as e:
+        error_message = f"Se produjo una excepción: {str(e)}"
+        print(error_message)
     return render(request,
-           'transacciones/lista.html'
+           'balance/listar-balance.html'
            ,contexto)
 
+def sumarTransacciones(request,year_1=None,year_2=None,op=1):
+    cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
+    diccionario_cuentas = {}
+    contexto = {}
+    totalactivos = 0
+    total = 0
+    anio_1 = ""
+    anio_2 = ""
+    if op == 1:
+        anio_1 = year_1
+        anio_2 = year_2
+    else:
+        #date(anio,mes,dia)
+        anio_1 = date(timezone.now().year,1,1)
+        anio_2 = date(timezone.now().year,12,31)
+
+    for cuenta in cuentasActivos:
+        saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
+                                                    fecha_creacion__range=(anio_1,anio_2)
+                                                ).aggregate(total=Sum('monto'))
+        saldoDebito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
+                                                    fecha_creacion__range=(anio_1,anio_2)
+                                                ).aggregate(total=Sum('monto'))
+        try:
+            id_trans = cuenta.transacciones.get(naturaleza=Transaccion.Naturaleza.DEBITO,fecha_creacion__range=(anio_1,anio_2))
+            print(id_trans)
+        except Exception as e:
+            error_message = f"Se produjo una excepción: {str(e)}"
+            print("saldo debito pk",type(id_trans))
+
+        if saldoCredito["total"] is None:
+            saldoCredito["total"] = Decimal(0.0)
+        if saldoDebito["total"] is None:
+            saldoDebito["total"] = Decimal(0.0)
+        total = saldoDebito["total"] - saldoCredito["total"]
+        totalactivos += total 
+
+        
+
+        diccionario_cuentas[cuenta] = {
+        'saldo_credito': saldoCredito["total"],
+        'saldo_debito': saldoDebito["total"],
+        'total': total,
+        'num_cuenta': id_trans.pk
+        }
+
+
+    contexto = {'cuentasActivos': cuentasActivos,
+        'totalActivos': total,
+        'diccionario_cuentas':diccionario_cuentas,
+        'pathbase':settings.BASE_DIR,}
+        
+    return contexto
+
+class TransaccionUpdateView(UpdateView):
+    model = Transaccion
+    form_class = UpdateTransaccionForm
+    template_name = 'balance/transaccion_update.html'
+    success_url = reverse_lazy('conta:transaccion-lista')
+
+    def get_object(self, queryset=None):
+        # Obtener el objeto que se va a actualizar
+        objeto = Transaccion.objects.get(pk=self.kwargs['id_cuenta'])
+        return objeto
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = self.get_object()
+        context["nombre_cuenta"] = obj.cuenta
+        return context
 #HU-25-Listar Estados de Resultado
 # Mostrar Estados de Resultados 
 # (Empresa Registrada)

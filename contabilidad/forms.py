@@ -1,5 +1,5 @@
 from django import forms
-from .models import Catalogo,Empresa,Cuenta
+from .models import Catalogo,Empresa,Cuenta,Transaccion
 
 
 class CatalagoForm(forms.ModelForm):
@@ -70,4 +70,12 @@ class ActivoCorrienteForm(forms.Form):
             field.widget.attrs.update({'class': 'btn btn-primary'})
 
         
+class UpdateTransaccionForm(forms.ModelForm):
+    class Meta:
+        model = Transaccion
+        fields = ['cuenta', 'monto']
 
+        widgets = {
+            'cuenta': forms.Select(attrs={'class': 'form-control d-none'}),
+            'monto': forms.TextInput(attrs={'class': 'form-control'}),
+        }

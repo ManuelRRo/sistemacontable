@@ -12,6 +12,7 @@
            <!-- <th>Debe</th>
            <th>Haber</th> -->
            <th>Total</th>
+           <th>funciones</th>
        </thead>
        <tbody>
            
@@ -21,6 +22,7 @@
                <!-- <td>{{ valores.saldo_debito }}</td>  debe -->
                <!-- <td>{{ valores.saldo_credito }}</td> Haber -->
                <td>{{ valores.total }}</td>
+               <td><a href="{% url 'conta:actualizar-monto' valores.num_cuenta %}" class="btn btn-primary">Actualizar</a></td>
            </tr>
            {% endfor %}
            
