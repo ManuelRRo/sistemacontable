@@ -8,31 +8,22 @@
 
 <form method="post" enctype="multipart/form-data">
     {{empresa_form.as_p}}
-    <h6>Cargar Balance General</h6>
+    <h6>Cargar Excel de Estados Financieros</h6>
     {{ form.as_p }}
 
     {% csrf_token %}
-    <p><input type="submit" value="Guardar"></p>
+    <p><input class="btn btn-success" type="submit" value="Guardar"></p>
 </form>
 {% else %}
-<h1>No Tiene propietario registrado</h1>
+<h1>No tiene propietario registrado</h1>
 {% endif%}
- {% endblock %}
-
-
-{% block filtros%}
-{% if propietario %}
-<form method="post">
-    {% csrf_token %}
-    <label for="fname">Fecha inicial</label><br>
-    <input type="date" id="año" name="fechainicio" value="Año"><br>
-
-    <label for="fame">Fecha final</label><br>
-    <input type="date" id="año" name="fechafinal" value="Año"><br>
-    
-    <input type="submit" value="Submit">
-</form> 
-<h2>{{balance}}</h2>
-{% endif%}
+<script>
+    var nombre_empresa = document.getElementById('id_nombre_empresa');
+    var sectores = document.getElementById('id_sectores');
+    var archivo = document.getElementById('id_archivo');
+    nombre_empresa.className += 'form-control';
+    sectores.className += 'form-select';
+    archivo.className += 'form-control';
+</script>
 {% endblock %}
 
