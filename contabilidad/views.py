@@ -19,6 +19,15 @@ import pandas as pd
 from asgiref.sync import sync_to_async
 import plotly.graph_objects as go
 
+@login_required
+def home(request):
+    context = {}
+    propietario = Propietario.objects.filter(user = request.user).first()
+    empresa = Empresa.objects.filter(propietario = propietario).first()
+    context['propietario'] = propietario
+    context['empresa'] = empresa
+    return render(request,'home/inicio.html', context)
+
 
 #HU-19-Grafico de variacion
 @sync_to_async

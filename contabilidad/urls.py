@@ -8,7 +8,8 @@ from . import views
 app_name = 'conta'
 
 urlpatterns = [
-    path('',views.cargarBalanceGeneral,name="transaccion-lista"),
+    path('',views.home,name="home"),
+    path('balance_general',views.cargarBalanceGeneral,name="ver_balance_general"),
     path('balance/actualizar-monto/<int:id_cuenta>',views.TransaccionUpdateView.as_view(),name="actualizar-monto"),
     path('catalogo/',views.ListarCatalogo,name="catalogo"),
     path('cargaEmpresa/',views.CrearEmpresa,name="cargar-balance"),

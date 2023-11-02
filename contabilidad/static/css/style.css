@@ -510,6 +510,10 @@ body{
    margin-bottom: 0;
 }
 
+.card-content:hover{
+    background: var(--light);
+}
+
 @media screen and (max-width: 768px) {
     .sidebar{
         width: 200px;

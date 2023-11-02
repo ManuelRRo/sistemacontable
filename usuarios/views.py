@@ -11,7 +11,7 @@ def login_user(request):
         user = authenticate(request,username = username,password = password,)
         if user is not None:
             login(request,user)
-            return redirect('conta:transaccion-lista')
+            return redirect('conta:home')
         else:
             messages.error(request,("Lo sentimos, las credenciales que ingresaste no son correctas. Por favor, verifica tu nombre de usuario y contraseña e inténtalo de nuevo."))
             return redirect('login')
