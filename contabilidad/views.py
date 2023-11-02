@@ -239,6 +239,7 @@ def ActualizarCuentasRatios(request):
                     # Verificar si el ID de ratio ya fue visto
                     if id_ratio in id_ratios_vistos:
                         context["form_as"] = ActivoCorrienteForm(request_=request,user=None)
+                        context["error_message"] = "Seleccione una cuenta diferente para cada Ratio"
                         #print("Formulario en contexto:", context.get("form_as"))
                         return render(request,'ratios/HU-005-cuenta-ratios.html',context)
                     else:
@@ -251,6 +252,7 @@ def ActualizarCuentasRatios(request):
                         
     
     context["form_as"] = ActivoCorrienteForm(request_=request,user=request.user)
+    context["error_message"] = None
     #Crear Cuentas de Ratios
     return render(request,'ratios/HU-005-cuenta-ratios.html',context)
 
