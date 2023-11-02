@@ -610,7 +610,7 @@ def calcular_ratios(request):
         year_2 = timezone.now().strftime('%Y-%m-%d')  
     return render(request,"ratios/calcular-ratios.html",{'ratios':ratios,'empresa':emprsa})
 
-def comparacionRatiosEmpresas(request):
+def comparacionRatiosEmpresasPromedio(request):
     try:
         propietarioemprsa = get_object_or_404(Propietario,user=request.user)
 
@@ -625,8 +625,12 @@ def comparacionRatiosEmpresas(request):
 
     anio=2023
     activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first()
-    empresa1 = get_object_or_404(Empresa,id=1)
-    empresa2 = get_object_or_404(Empresa,id=2)
+    empresa1 = get_object_or_404(Empresa,propietario=propietarioemprsa)
+    empresa2 = get_object_or_404(Empresa,id=8)
+    empresas=[
+        {"nombre":empresa1},
+        {"nombre":empresa2}
+    ]
     ratios1=[]
     ratios2=[]
     if activoCorriente is None:
@@ -638,15 +642,31 @@ def comparacionRatiosEmpresas(request):
         ratios2=funcionRatios(anio,request,empresa2)
     
     promedios=[
-
+        {"nombre":"Razón circulante"},
+        {"nombre":"Prueba ácida"},
+        {"nombre":"Razón de capital de trabajo"},
+        {"nombre":"Razón de efectivo"},
+        {"nombre":"Razón de rotación de inventario"},
+        {"nombre":"Razón de días de inventario"},
+        {"nombre":"Razón de rotación de cuentas por cobrar"},
+        {"nombre":"Razón de período medio de cobranza"},
+        {"nombre":"Razón de rotación de cuentas por pagar"},
+        {"nombre":"Período medio de pago"}
     ]
-    for ratio1, ratio2 in zip(ratios1, ratios2):
-        promedio = {
-            'ratio1': ratio1['valor'],
-            'ratio2': ratio2['valor'],
-            'promedio': (ratio1['valor'] + ratio2['valor']) / 2
-        }
-        promedios.append(promedio) 
+    for elemento,ratio1, ratio2 in zip(promedios,ratios1, ratios2):
+        promedio=(ratio1['valor'] + ratio2['valor']) / 2
+
+        elemento['ratio1']=ratio1['valor']
+        elemento['ratio2']= ratio2['valor']
+        elemento['promedio']=promedio
     
-    
-    return render(request,"ratios/comparacion-empresas-ratios.html",{'ratios1':ratios1,'ratios2':ratios2,'promedios':promedios,'empresa1':empresa1,'empresa2':empresa2})
+        if ratio1['valor']>=promedio:
+            elemento['ratio1esMayor']=True
+        else:
+            elemento['ratio1esMayor']=False
+
+        if ratio2['valor']>=promedio:
+            elemento['ratio2esMayor']=True
+        else:
+            elemento['ratio2esMayor']=False
+    return render(request,"ratios/comparacion-empresas-ratios-promedio.html",{'promedios':promedios,'empresas':empresas,'miempresa':empresa1})

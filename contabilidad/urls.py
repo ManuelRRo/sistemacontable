@@ -18,8 +18,10 @@ urlpatterns = [
     #HU-05-Definir Cuentas Ratios
     path('homeRatios/',views.homeRatios,name="home-ratios"),
     path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
-    path('comparacion_ratios_empresas/',views.comparacionRatiosEmpresas,name="comparacion-ratios-empresas"),
+    path('comparacion_ratios_empresas_promedio/',views.comparacionRatiosEmpresasPromedio,name="comparacion-ratios-empresas-promedios"),
     path('grafico_ratios/',views.graficoRatios,name="grafico_ratios"),
+    path('comparacion_ratios_empresas_valor',views.comparacionRatiosEmpresasPromedio)
+
 ]
 
 if settings.DEBUG:
