@@ -20,8 +20,8 @@ urlpatterns = [
     path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
     path('comparacion_ratios_empresas_promedio/',views.comparacionRatiosEmpresasPromedio,name="comparacion-ratios-empresas-promedios"),
     path('grafico_ratios/',views.graficoRatios,name="grafico_ratios"),
-    path('comparacion_ratios_empresas_valor',views.comparacionRatiosEmpresasPromedio)
-
+    path('comparacion_ratios_empresas_valor/',views.comparacionRatiosEmpresasValor,name="comparacion-ratios-empresas-valor"),
+    
 ]
 
 if settings.DEBUG:

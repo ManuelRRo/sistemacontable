@@ -1,0 +1,103 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    ANF115 | Comparacion de ratios por valor
+{% endblock %}
+
+{% block content %} 
+    
+<div class="d-flex justify-content-center">
+    <p>Ingrese los valores de los ratios que desea comparar, los ratios que deje en blanco no se mostrarán en la comparación</p>
+</div>    
+
+
+<div class="table-responsive">
+    <form action="" method="POST">
+    {% csrf_token %}
+    <table class="table table-borderless table-hover">
+        <thead>
+            <th>Ratio</th>
+            <th>Valor</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Razón circulante</td>
+                <td><input type="number" placeholder="1.0" name="razonCirculante" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Prueba ácida</td>
+                <td><input type="number" placeholder="1.0" name="pruebaAcida" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Razón de capital de trabajo</td>
+                <td><input type="number" placeholder="0" name="razonCapitalTrabajo" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Razón de efectivo</td>
+                <td><input type="number" placeholder="0.1" name="razonEfectivo" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Razón de rotación de inventario</td>
+                <td><input type="number" name="razonRotacionInventario" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Razón de días de inventario</td>
+                <td><input type="number" placeholder="75" name="razonDiasInventario" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Razón de rotación de cuentas por cobrar</td>
+                <td><input type="number" name="razonRotacionCuentasCobrar" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Razón de período medio cobranza</td>
+                <td><input type="number" name="razonPeriodoMedioCobranza" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Razón de rotación de cuentas por pagar</td>
+                <td><input type="number" name="razonRotacionCuentasPagar" id="" value="1"></td>
+            </tr>
+            <tr>
+                <td>Período de medio pago</td>
+                <td><input type="number" name="periodoMedioPago" id="" value="1"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex justify-content-center">
+    <button type="submit" class="btn btn-primary">Comparar</button>
+    </div>
+    </form>
+</div>
+    
+
+    
+
+    
+{% endblock %}
+
+{% block filtros%}
+</br>
+<form method="post" onsubmit="return validarFechas()">
+    {% csrf_token %}
+    <label for="fechainicio">Fecha inicial</label><br>
+    <input class="form-control" type="date" id="fechainicio" name="fechainicio" {%if fecha_inicio %} value={{fecha_inicio}} {% endif %} required><br>
+
+    <label for="fechafinal">Fecha final</label><br>
+    <input class="form-control" type="date" id="fechafinal" name="fechafinal" {%if fecha_final %} value={{fecha_final}} {% endif %} required><br>
+    <div class="text-center">
+        <input class="btn btn-dark" type="submit" value="Generar">
+    </div>
+</form>
+</br>
+<script>
+    function validarFechas() {
+        var fechaInicio = new Date(document.getElementById('fechainicio').value);
+        var fechaFinal = new Date(document.getElementById('fechafinal').value);
+        if (fechaInicio >= fechaFinal) {
+            alert('La fecha inicial debe ser menor que la fecha final');
+            return false;  // Impide que el formulario se envíe
+        }
+
+        return true;  // Permite que el formulario se envíe si las fechas son válidas
+    }
+</script>
+{% endblock %}
