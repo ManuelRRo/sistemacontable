@@ -1,23 +1,45 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}
-    Ratios | AnalytiFin
+    Comparacion de ratios por promedio | AnalytiFin
 {% endblock %}
 
-{% block content %}    
-    
-    <table>
+{% block content %} 
+    <h4 class="text-center mt-4">{{miempresa}}</h4>
+    <div class="text-center fw-400 mb-3">
+        Comparacion de ratios por promedio
+    </div>   
+<div class="table-responsive">
+    <table class="table table-borderless table-hover">
         <thead>
-            <th>ratio1</th>
-            <th>ratio2</th>
+            <th>Ratio</th>
+            {% for empresa in empresas %}
+            <th>{{empresa.nombre}}</th>
+            {% endfor %}
             <th>promedio</th>
         </thead>
         <tbody>
-            {% for promedio in promedios %}
-                {{ promedio.ratio1|floatformat:2 }} {{ promedio.ratio2|floatformat:2 }} {{ promedio.promedio|floatformat:2 }}<br>
+            <tr>
+            {% for elemento in promedios %}
+            <td>{{elemento.nombre}}</td>
+            {% if elemento.ratio1esMayor %}
+            <td style="background-color: green;">{{ elemento.ratio1|floatformat:2 }}</td>
+            {% else %}
+            <td style="background-color: red;">{{ elemento.ratio1|floatformat:2 }}</td>
+            {% endif %}
+            {% if elemento.ratio2esMayor %}
+            <td style="background-color: green;">{{ elemento.ratio2|floatformat:2 }}</td>
+            {% else %}
+            <td style="background-color: red;">{{ elemento.ratio2|floatformat:2 }}</td>
+            {% endif %}
+            <td>{{ elemento.promedio|floatformat:2 }}</td>
+            </tr>
+            
             {% endfor %}
         </tbody>
     </table>
+</div>
+    
 
     
 

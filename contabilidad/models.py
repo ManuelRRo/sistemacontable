@@ -29,7 +29,7 @@ class Catalogo(models.Model):
     archivo = models.FileField(upload_to='archivos_excel/',blank=False)
     
     def __str__(self):
-        return self.nombre_catalogo
+        return self.nombre_catalogo+" id "+str(self.id)
 
 class Empresa(models.Model):
 

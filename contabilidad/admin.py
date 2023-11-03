@@ -16,7 +16,7 @@ class CatalogoAdmin(admin.ModelAdmin):
 
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id','nombre_empresa','catalogo_empresa','propietario']
 
 @admin.register(Propietario)
 class EmpresaAdmin(admin.ModelAdmin):

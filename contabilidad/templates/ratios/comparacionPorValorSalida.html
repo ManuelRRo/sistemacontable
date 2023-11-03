@@ -1,47 +1,49 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}
-    ANF115 | Ratios
+    ANF115 | Comparacion de ratios por valor
 {% endblock %}
 
-{% block content %}    
-    {% if ratios %}
-    <h4 class="text-center mt-4">{{empresa}}</h4>
+{% block content %} 
+    <h4 class="text-center mt-4">{{miempresa}}</h4>
     <div class="text-center fw-400 mb-3">
-        Ratios
-    </div>
+        Comparacion de ratios por valor
+    </div>  
     <div class="table-responsive">
-        
         <table class="table table-borderless table-hover">
             <thead>
-                <th>Nombre</th>
-                <th>Valor</th>
+                <th>Ratio</th>
+                {% for empresa in empresas %}
+                <th>{{empresa.nombre}}</th>
+                {% endfor %}
+                <th>Valor ingresado</th>
             </thead>
             <tbody>
-                {% for ratio in ratios %}
                 <tr>
-                    <td>{{ratio.nombre}}</td>
-                    <td>{{ratio.valor|floatformat:2}}</td>                 
+                {% for elemento in ratios %}
+                <td>{{elemento.nombre}}</td>
+                {% if elemento.ratio1esMayor %}
+                <td style="background-color: green;">{{ elemento.ratio1|floatformat:2 }}</td>
+                {% else %}
+                <td style="background-color: red;">{{ elemento.ratio1|floatformat:2 }}</td>
+                {% endif %}
+                {% if elemento.ratio2esMayor %}
+                <td style="background-color: green;">{{ elemento.ratio2|floatformat:2 }}</td>
+                {% else %}
+                <td style="background-color: red;">{{ elemento.ratio2|floatformat:2 }}</td>
+                {% endif %}
+                <td>{{ elemento.valor|floatformat:2 }}</td>
                 </tr>
+                
                 {% endfor %}
             </tbody>
         </table>
-    
-    </div>
-    {% else %}
-    <div class="d-flex justify-content-center">
-        <div class="container">
-            <div class="col-12"></div>
-            <strong>No se han asignado las cuentas para el cálculo de ratios</strong>
-        </div>
-        <div class="container">
-            <div class="col-12"></div>
-            <a href="{% url 'conta:crear-cuentas-ratios'%}" class="btn btn-primary">Definir Cuentas para calcular los Ratios</a>
-        </div>
     </div>
     
-    {% endif %}
     
+
+    
+
     
 {% endblock %}
 
