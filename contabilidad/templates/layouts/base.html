@@ -44,6 +44,21 @@
           {% block filtros%}
           {% endblock %}
         </div> {% endcomment %}
+        {% if messages %}
+        {% for message in messages %}
+
+        <div class="container-xl mt-4">
+            <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                <i class='bx bxs-bell-ring bx-tada'></i>
+                <strong>Notificación</strong> 
+                <p>{{message}}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+        {% endfor %}
+        {% endif %}
+        
         {% block content %}
         {% endblock %}
         

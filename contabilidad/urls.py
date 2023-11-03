@@ -21,6 +21,8 @@ urlpatterns = [
     path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
     path('comparacion_ratios_empresas/',views.comparacionRatiosEmpresas,name="comparacion-ratios-empresas"),
     path('grafico_ratios/',views.graficoRatios,name="grafico_ratios"),
+    # Benchmark
+    path('benchmark/', login_required(views.Benchmark.as_view()), name="ver_benchmark"),
 ]
 
 if settings.DEBUG:

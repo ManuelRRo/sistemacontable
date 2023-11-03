@@ -35,6 +35,7 @@ class Empresa(models.Model):
 
     class Sector(models.TextChoices):
         MINERA = 'MNR','Minería'
+        TURISMO = 'TRM','Turismo'
 
     nombre_empresa = models.CharField(max_length=255,blank=False)
     sector = models.CharField(max_length=5,choices=Sector.choices,default=Sector.MINERA)

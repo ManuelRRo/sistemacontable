@@ -3,7 +3,7 @@
 {% block title %}Inicio | AnalytiFin{% endblock %}
 
 {% block content %}
-    {% if propietario %}
+    {% if propietario.empresactiva %}
     <div class="header">
         <div class="left">
             <h1>{{empresa.nombre_empresa}}</h1>
@@ -27,6 +27,7 @@
                     </p>
                     <a href="{% url 'conta:ver_balance_general' %}" class="card-link">Balance General</a>
                     <a href="{% url 'conta:ver_estado_resultado' %}" class="card-link">Estado de Resultados</a>
+                    <a href="{% url 'conta:variacion_cuenta' %}" class="card-link">Visión Gráfica</a>
                 </div>
             </div>
         </div>
@@ -35,19 +36,9 @@
                 <div class="card-body">
                   <h5 class="card-title">Ratios Financieros</h5>
                   <h6 class="card-subtitle mb-2 text-body-secondary">Desempeños de la Empresa</h6>
-                  <p class="card-text">Indicadores de las actividades de la empresa.</p>
-                  <a href="{% url 'conta:home-ratios' %}" class="card-link">Ver</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 mb-3">
-            <div class="card rounded-4 card-content">
-                <div class="card-body">
-                  <h5 class="card-title">Comparaciones</h5>
-                  <h6 class="card-subtitle mb-2 text-body-secondary">Análisis de Desempeño</h6>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  <a href="#" class="card-link">Card link</a>
-                  <a href="#" class="card-link">Another link</a>
+                  <p class="card-text">Indicadores de las actividades de la empresa con el próposito de analizar y supervisar el desempeño.</p>
+                  <a href="{% url 'conta:home-ratios' %}" class="card-link">Inicio</a>
+                  <a href="{% url 'conta:grafico_ratios' %}" class="card-link">Visión Gráfica</a>
                 </div>
             </div>
         </div>
@@ -56,14 +47,78 @@
                 <div class="card-body">
                   <h5 class="card-title">Análisis de la Empresa</h5>
                   <h6 class="card-subtitle mb-2 text-body-secondary">Cuentas</h6>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  <a href="#" class="card-link">Card link</a>
-                  <a href="#" class="card-link">Another link</a>
+                  <p class="card-text">Análisis de los estados financieros de {{empresa.nombre_empresa}}: Análisis Vertical y Análisis Horizontal.</p>
+                  <a href="#" class="card-link">Análisis Vertical</a>
+                  <a href="#" class="card-link">Análisis Horizontal</a>
                 </div>
             </div>
         </div>
     </div>
-    {% else %}
-    
+    {% elif user.is_superuser %}
+    <div class="header">
+        <div class="left">
+            <h1>Bienvenido {{user}}</h1>
+            <ul class="breadcrumb">
+                <li><a href="#">
+                        AnalytiFin
+                    </a></li>
+                /
+                <li><a href="#" class="active">Inicio</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6 mb-3">
+            <div class="card rounded-4 card-content">
+                <div class="card-body">
+                  <h5 class="card-title">Comparaciones entre Empresas</h5>
+                  <h6 class="card-subtitle mb-2 text-body-secondary">Análisis de Desempeño</h6>
+                  <p class="card-text">Comparaciones de razones financieras entre diferentes empresas para analizar el desempeño.</p>
+                  <a href="{% url 'conta:comparacion-ratios-empresas' %}" class="card-link">Sectores</a>
+                  <a href="{% url 'conta:ver_benchmark' %}" class="card-link">Benchmark</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif not propietario.empresactiva%}
+    <div class="header">
+        <div class="left">
+            <h1>Hola {{propietario}}</h1>
+            <ul class="breadcrumb">
+                <li><a href="#">
+                        AnalytiFin
+                    </a></li>
+                /
+                <li><a href="#" class="active">Inicio</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 1px">
+                <div class="progress-bar" style="width: 25%"></div>
+            </div>
+            <h6 class="fw-bolder mt-3">Sobre nosotros</h6>
+            <p>
+                AnalytiFin es una plataforma diseñada para brindarte una ayuda óptima en finanzas, dedicada al análisis financieros de cualquier sector. 
+                Los estados financieros de tu empresa son la clave para formular estratégias efectivas, por lo tanto, 
+                estamos interesados en ofrecerte la mejor calidad en datos analíticos que pueden mostrate el rendimiento actual de tu negocio.
+            </p>
+            <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 1px">
+                <div class="progress-bar" style="width: 75%"></div>
+            </div>
+            <h6 class="fw-bolder mt-3">Primeros pasos</h6>
+            <p>
+                Para que la plataforma analice la información de tu empresa, debes registrarla previamente anexando un archivo Excel con los estados financieros: 
+                Balance General y Estado de Resultado. Los puedes hacer desde <a href="{% url "conta:cargar-balance" %}">aquí</a> o desde el enlace "Empresa"
+            </p>
+        </div>
+        <div class="col-4">
+            <a href="{% url "conta:home" %}" class="logo">
+                <i class='bx bx-wallet bx-flashing'></i>
+                <div class="logo-name">Analyti<span>Fin</span></div>
+            </a>
+        </div>
+    </div>
     {% endif%}
 {% endblock %}

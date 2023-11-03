@@ -26,7 +26,22 @@ from plotly.io import to_image
 from io import BytesIO
 import base64
 
+#
+# Función que puede ser utilizada para identificar al usuario
+#
+def usuario_identificado(request):
+    context = {}
+    is_propietario = Propietario.objects.filter(user = request.user).exists()
+    if is_propietario:
+        propietario = Propietario.objects.filter(user = request.user).first()
+        context['propietario'] = propietario
+    context['is_propietario'] = is_propietario
+    return context
 
+
+#
+# Para mostrar el inicio de la app web
+#
 @login_required
 def home(request):
     context = {}
@@ -85,150 +100,164 @@ def grafico_var(request):
 #HU-002-Registrar empresa con catálogo, BGN Y ERS en formato excel
 def CrearEmpresa(request):
 
-    contexto = {}
-    
-    try:
-        propietario_empresa = request.user.propietario
-    except:
-        print("No tiene Propietario Asignado")
+    usuario_identidad = usuario_identificado(request)
+    if usuario_identidad['is_propietario']:
+        if usuario_identidad['propietario'].empresactiva == 0:
+            acceso = 1
+        else:
+            acceso = 0
+    else:
+        acceso = 0
+
+    if acceso:
         contexto = {}
-        contexto["propietario"] = False
-        return render(request,'empresa/crear-empresa.html',contexto)
+        
+        try:
+            propietario_empresa = request.user.propietario
+        except:
+            print("No tiene Propietario Asignado")
+            contexto = {}
+            contexto["propietario"] = False
+            return render(request,'empresa/crear-empresa.html',contexto)
 
-    if request.method == 'POST':
+        if request.method == 'POST':
 
-        form = CatalagoForm(request.POST,
-                            request.FILES)
-        empresa_form = EmpresaForm(request.POST)
-        print(form.errors)
-        if form.is_valid() and empresa_form.is_valid():
-            #Crear catalogo
-            catalogo_excel = form.save()
-            #get nombre empresa
-            nombreempresa = empresa_form.cleaned_data['nombre_empresa']
-            sectorempresa = empresa_form.cleaned_data['sectores']
-            #Crear la empresa
-            new_empresa = Empresa(nombre_empresa=nombreempresa,
-                                  sector=sectorempresa,
-                                  catalogo_empresa=catalogo_excel,
-                                  propietario=propietario_empresa)
-            new_empresa.save()
-            #activar la empresa
-            p = Propietario.objects.get(user=request.user)
-            p.empresactiva = True
-            p.save()
-            
-            #Leer catalogo en excel
-            path = f"{settings.MEDIA_ROOT}/{catalogo_excel.archivo}"
-            hoja_bgn = pandas.read_excel(path,sheet_name="BGN")
-            balance = {}
-
-            #Crear Cuentas de Ratios
-            for ratio in Ratio.NombreRatio.choices:
-                print(ratio)
-
-            lista_anios = [hoja_bgn.columns[2], hoja_bgn.columns[3], hoja_bgn.columns[4]]
-            
-            for index, row in hoja_bgn.iterrows():
-                #Extraer primer caracter de la columna codigo
-                cod = str(row['codigo'])[0]
-                tipo = ''
-                #Asginar categoria de acuerdo al primer caracter del codigo del catalago
-                if cod == '1':
-                    tipo = Cuenta.Categoria.ACTIVO
-                if cod == '2':
-                    tipo = Cuenta.Categoria.PASIVO
-                if cod == '3':
-                    tipo = Cuenta.Categoria.PATRIMONIO
-                #Agregar una opcion para generar el catalogo primero
-                # y luego solo pasarlo aqui para agrupar las cuentas por catalogo
-                cuenta = Cuenta.objects.create(
-                    codigo = row["codigo"],
-                    nombre = row["cuenta"],
-                    categoria = tipo,
-                    catalogo = catalogo_excel
-                )
-                try:
-                    for anio in lista_anios:
-                        t = Transaccion.objects.create(
-                            monto=Decimal(row[anio]),
-                            descripcion="Cuenta del " + str(anio),
-                            slug="Balance general",
-                            cuenta=cuenta,
-                            fecha_creacion=f"{str(anio)}-10-25 00:00:00",
-                            tipo_transaccion="CMP",
-                            naturaleza = "DBT"
-                        )
-                except:
-                    print(row[anio])
-
-            # Leer hoja ERS - Estado de Resultados
-            hoja_ers = pandas.read_excel(path, sheet_name="ERS")
-
-            # Obtener años
-            lista_anios = [hoja_ers.columns[2], hoja_ers.columns[3], hoja_ers.columns[4]]
-
-            # Variables a utilizar
-            codigo_ers = ''
-            categoria_ers = ''
-            subcategoria_ers = ''
-            naturaleza_ers = ''
-
-            for index, row in hoja_ers.iterrows():
-                # Extraer caracteres de la columna codigo
-                codigo_ers = str(row['codigo'])
-                categoria_ers = ''
-
-                # Asignar categoria de cada cuenta
-                if codigo_ers[0] == '4':
-                    categoria_ers = Cuenta.Categoria.RESULTADOS_DEUDORAS
-                    naturaleza_ers = Transaccion.Naturaleza.CREDITO
-                    # Asignar subcategoria
-                    if codigo_ers[1] == '1':
-                        subcategoria_ers = Cuenta.Subcategoria.COSTOS
-                    elif codigo_ers[1] == '2':
-                        subcategoria_ers = Cuenta.Subcategoria.GASTOS_OPERACIONALES
-                elif codigo_ers[0] == '5':
-                    categoria_ers = Cuenta.Categoria.RESULTADOS_ACREEDORAS
-                    naturaleza_ers = Transaccion.Naturaleza.DEBITO
-                    # Asignar subcategoria
-                    if codigo_ers[1] == '1': 
-                        subcategoria_ers = Cuenta.Subcategoria.INGRESOS_OPERACIONALES
-                else:
-                    categoria_ers = Cuenta.Categoria.ESTADO_RESULTADOS
-                    subcategoria_ers = Cuenta.Subcategoria.NINGUNA
+            form = CatalagoForm(request.POST,
+                                request.FILES)
+            empresa_form = EmpresaForm(request.POST)
+            print(form.errors)
+            if form.is_valid() and empresa_form.is_valid():
+                #Crear catalogo
+                catalogo_excel = form.save()
+                #get nombre empresa
+                nombreempresa = empresa_form.cleaned_data['nombre_empresa']
+                sectorempresa = empresa_form.cleaned_data['sectores']
+                #Crear la empresa
+                new_empresa = Empresa(nombre_empresa=nombreempresa,
+                                    sector=sectorempresa,
+                                    catalogo_empresa=catalogo_excel,
+                                    propietario=propietario_empresa)
+                new_empresa.save()
+                #activar la empresa
+                p = Propietario.objects.get(user=request.user)
+                p.empresactiva = True
+                p.save()
                 
-                # Crear cuenta con los datos anteriores
-                cuenta_ers = Cuenta.objects.create(
-                    codigo = row["codigo"],
-                    nombre = row["cuenta"],
-                    categoria = categoria_ers,
-                    subcategoria = subcategoria_ers,
-                    catalogo = catalogo_excel
-                )
+                #Leer catalogo en excel
+                path = f"{settings.MEDIA_ROOT}/{catalogo_excel.archivo}"
+                hoja_bgn = pandas.read_excel(path,sheet_name="BGN")
+                balance = {}
 
-                for anio in lista_anios:
-                    Transaccion.objects.create(
-                        monto=Decimal(row[anio]),
-                        descripcion="Cuenta del " + str(anio),
-                        slug="Estado de Resultado",
-                        cuenta=cuenta_ers,
-                        fecha_creacion=f"{str(anio)}-12-31 00:00:00",
-                        tipo_transaccion="OPE",
-                        naturaleza = naturaleza_ers
+                #Crear Cuentas de Ratios
+                for ratio in Ratio.NombreRatio.choices:
+                    print(ratio)
+
+                lista_anios = [hoja_bgn.columns[2], hoja_bgn.columns[3], hoja_bgn.columns[4]]
+                
+                for index, row in hoja_bgn.iterrows():
+                    #Extraer primer caracter de la columna codigo
+                    cod = str(row['codigo'])[0]
+                    tipo = ''
+                    #Asginar categoria de acuerdo al primer caracter del codigo del catalago
+                    if cod == '1':
+                        tipo = Cuenta.Categoria.ACTIVO
+                    if cod == '2':
+                        tipo = Cuenta.Categoria.PASIVO
+                    if cod == '3':
+                        tipo = Cuenta.Categoria.PATRIMONIO
+                    #Agregar una opcion para generar el catalogo primero
+                    # y luego solo pasarlo aqui para agrupar las cuentas por catalogo
+                    cuenta = Cuenta.objects.create(
+                        codigo = row["codigo"],
+                        nombre = row["cuenta"],
+                        categoria = tipo,
+                        catalogo = catalogo_excel
+                    )
+                    try:
+                        for anio in lista_anios:
+                            t = Transaccion.objects.create(
+                                monto=Decimal(row[anio]),
+                                descripcion="Cuenta del " + str(anio),
+                                slug="Balance general",
+                                cuenta=cuenta,
+                                fecha_creacion=f"{str(anio)}-10-25 00:00:00",
+                                tipo_transaccion="CMP",
+                                naturaleza = "DBT"
+                            )
+                    except:
+                        print(row[anio])
+
+                # Leer hoja ERS - Estado de Resultados
+                hoja_ers = pandas.read_excel(path, sheet_name="ERS")
+
+                # Obtener años
+                lista_anios = [hoja_ers.columns[2], hoja_ers.columns[3], hoja_ers.columns[4]]
+
+                # Variables a utilizar
+                codigo_ers = ''
+                categoria_ers = ''
+                subcategoria_ers = ''
+                naturaleza_ers = ''
+
+                for index, row in hoja_ers.iterrows():
+                    # Extraer caracteres de la columna codigo
+                    codigo_ers = str(row['codigo'])
+                    categoria_ers = ''
+
+                    # Asignar categoria de cada cuenta
+                    if codigo_ers[0] == '4':
+                        categoria_ers = Cuenta.Categoria.RESULTADOS_DEUDORAS
+                        naturaleza_ers = Transaccion.Naturaleza.CREDITO
+                        # Asignar subcategoria
+                        if codigo_ers[1] == '1':
+                            subcategoria_ers = Cuenta.Subcategoria.COSTOS
+                        elif codigo_ers[1] == '2':
+                            subcategoria_ers = Cuenta.Subcategoria.GASTOS_OPERACIONALES
+                    elif codigo_ers[0] == '5':
+                        categoria_ers = Cuenta.Categoria.RESULTADOS_ACREEDORAS
+                        naturaleza_ers = Transaccion.Naturaleza.DEBITO
+                        # Asignar subcategoria
+                        if codigo_ers[1] == '1': 
+                            subcategoria_ers = Cuenta.Subcategoria.INGRESOS_OPERACIONALES
+                    else:
+                        categoria_ers = Cuenta.Categoria.ESTADO_RESULTADOS
+                        subcategoria_ers = Cuenta.Subcategoria.NINGUNA
+                    
+                    # Crear cuenta con los datos anteriores
+                    cuenta_ers = Cuenta.objects.create(
+                        codigo = row["codigo"],
+                        nombre = row["cuenta"],
+                        categoria = categoria_ers,
+                        subcategoria = subcategoria_ers,
+                        catalogo = catalogo_excel
                     )
 
+                    for anio in lista_anios:
+                        Transaccion.objects.create(
+                            monto=Decimal(row[anio]),
+                            descripcion="Cuenta del " + str(anio),
+                            slug="Estado de Resultado",
+                            cuenta=cuenta_ers,
+                            fecha_creacion=f"{str(anio)}-12-31 00:00:00",
+                            tipo_transaccion="OPE",
+                            naturaleza = naturaleza_ers
+                        )
 
-            contexto["balance"] = "Balance general cargado correctamente"
-            return redirect('conta:transaccion-lista')
+
+                contexto["balance"] = "Balance general cargado correctamente"
+                return redirect('conta:home')
+        else:
+            form = CatalagoForm()
+            empresa_form = EmpresaForm()
+            contexto["form"]=form
+            contexto["empresa_form"] = empresa_form 
+            contexto["propietario"] = True
+
+        return render(request,'empresa/crear-empresa.html',contexto)
     else:
-        form = CatalagoForm()
-        empresa_form = EmpresaForm()
-        contexto["form"]=form
-        contexto["empresa_form"] = empresa_form 
-        contexto["propietario"] = True
-
-    return render(request,'empresa/crear-empresa.html',contexto)
+        messages.error(request, 'Lo sentimos, parece que no tienes acceso')
+        return redirect('conta:home')
+        
 #HU HOME RATIOS
 def homeRatios(request):
     return render(request,'ratios/homeRatios.html')
@@ -388,12 +417,27 @@ def graficoRatios(request):
     return render(request, 'graficos/ratios.html', {'ratios': ratios})
 #HU-023-Listar Cuentas del Catalogo
 def ListarCatalogo(request):
-    catalogo = {}
-    try:
-        catalogo = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
-    except:
-        print("No hay catalogo")
-    return render(request,'catalogo/listar-catalogo.html',{'catalogo':catalogo})
+    usuario_identidad = usuario_identificado(request)
+    if usuario_identidad['is_propietario']:
+        if usuario_identidad['propietario'].empresactiva == 1:
+            acceso = 1
+        else:
+            acceso = 0
+    else:
+        acceso = 0
+    
+    if acceso:
+        catalogo = {}
+        try:
+            catalogo = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
+        except:
+            print("No hay catalogo")
+        return render(request,'catalogo/listar-catalogo.html',{'catalogo':catalogo})
+    else:
+        messages.error(request, 'Lo sentimos, parece que no tienes acceso')
+        return redirect('conta:home')
+
+    
 
 #HU-24-Listar balance general
 @login_required()
@@ -579,41 +623,52 @@ class VerEstadoResultado(View):
         
 
         return render(request, self.template_name, context) 
+
 def funcionRatios(anio,request,emprsa):
+    # Obtener el propietario de la empresa
     propietarioemprsa = get_object_or_404(Propietario,user=request.user)
     if emprsa is None:
         emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
-    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
-    pasivoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="PSVC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
-    inventario=Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
-    activosTotales=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTV", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
-    efectivo=Transaccion.objects.filter(cuenta__cuenta_ratio="EFCT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
-    valoresCortoPlazo=Transaccion.objects.filter(cuenta__cuenta_ratio="VLRS", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
-    costoDeVenta=Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
-    ventasNetas=Transaccion.objects.filter(cuenta__cuenta_ratio="VNTSN", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
-    cuentasPorPagarComerciales=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
-    cuentasPorCobrarComerciales=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto    
-    cuentasPorCobrarComercialesAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()  
-    cuentasPorPagarComercialesAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()   
-    inventarioAnterior=Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio-1).first()
-    compras=Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
     
-    razonCirculante=activoCorriente/pasivoCorriente
+    # Cuentas necesarias para calcular ratios financieros
+    activoCorriente = Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    pasivoCorriente = Transaccion.objects.filter(cuenta__cuenta_ratio="PSVC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    inventario = Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    activosTotales = Transaccion.objects.filter(cuenta__cuenta_ratio="ACTV", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    efectivo = Transaccion.objects.filter(cuenta__cuenta_ratio="EFCT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    valoresCortoPlazo = Transaccion.objects.filter(cuenta__cuenta_ratio="VLRS", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    costoDeVenta = Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    ventasNetas = Transaccion.objects.filter(cuenta__cuenta_ratio="VNTSN", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    cuentasPorPagarComerciales = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    cuentasPorCobrarComerciales = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto    
+    cuentasPorCobrarComercialesAnterior = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()  
+    cuentasPorPagarComercialesAnterior = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()   
+    inventarioAnterior = Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio-1).first()
+    compras = Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    
+    # Razon Circulante
+    razonCirculante = activoCorriente/pasivoCorriente
+    # Prueba Acida
     pruebaAcida=(activoCorriente-inventario)/pasivoCorriente
+    # Razon de Capital de Trabajo
     razonCapitalTrabajo=(activoCorriente-pasivoCorriente)/activosTotales
+    # Razon de Efectivo
     razonEfectivo=(efectivo+valoresCortoPlazo)/pasivoCorriente
+    # Razon de Rotacion de Inventario y Dias de Inventario
     if inventarioAnterior:
-        razonRotacionInventario=costoDeVenta/((inventario+inventarioAnterior.monto)/2)
-        razonDiasInventario=((inventario+inventarioAnterior.monto)/2)/(costoDeVenta/365)
+        razonRotacionInventario = costoDeVenta /((inventario+inventarioAnterior.monto)/2)
+        razonDiasInventario = ((inventario+inventarioAnterior.monto)/2)/(costoDeVenta/365)
     else:
-        razonRotacionInventario=costoDeVenta/inventario
-        razonDiasInventario=inventario/(costoDeVenta/365)
+        razonRotacionInventario = costoDeVenta/inventario
+        razonDiasInventario = inventario/(costoDeVenta/365)
+    # Razon de Rotacion de Cuentas por Cobrar y Periodo Medio de Cobranza
     if cuentasPorCobrarComercialesAnterior:
         razonRotacionCuentasPorCobrar=ventasNetas/((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)
         razonPeriodoMedioCobranza=(((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)*365)/ventasNetas
     else:
         razonRotacionCuentasPorCobrar=ventasNetas/cuentasPorCobrarComerciales
         razonPeriodoMedioCobranza=(cuentasPorCobrarComerciales*365)/ventasNetas
+    # Razon de Rotacion de Cuentas por Pagar y Periodo Medio de Pago
     if cuentasPorPagarComercialesAnterior:
         razonRotacionCuentasPorPagar=compras/((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)
         periodoMedioPago=(((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)*365)/compras
@@ -692,9 +747,8 @@ def comparacionRatiosEmpresas(request):
         ratios1=funcionRatios(anio,request,empresa1)
         ratios2=funcionRatios(anio,request,empresa2)
     
-    promedios=[
-
-    ]
+    promedios=[]
+    
     for ratio1, ratio2 in zip(ratios1, ratios2):
         promedio = {
             'ratio1': ratio1['valor'],
@@ -705,3 +759,130 @@ def comparacionRatiosEmpresas(request):
     
     
     return render(request,"ratios/comparacion-empresas-ratios.html",{'ratios1':ratios1,'ratios2':ratios2,'promedios':promedios,'empresa1':empresa1,'empresa2':empresa2})
+
+#
+# HU-11: Comparación de Empresas VS Ratio Financiero/Promedio
+#
+class Benchmark(View):
+
+    template_name = 'ratios/benchmark.html'
+
+    def get_queryset(self):
+        context = {}
+        context['sectores'] = Empresa.Sector.choices
+        return context
+    
+    def get_context_data(self, **kwargs):
+        context = {}
+        context.update(self.get_queryset()) 
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        context.update(self.get_context_data())
+        return render(request, self.template_name,context)
+    
+    def post(self, request, *args, **kwargs):
+        context = {}
+        context.update(self.get_context_data())
+        # Obteniendo datos del formulario
+        nombre_Ratio = str(request.POST.get('select_Ratio', None))
+        codigo_Sector = request.POST.get('select_Sector', None)
+        anio_benchmark = int (request.POST.get('anio_benchmark', None))
+
+        # Empresas que pertenecen al sector
+        empresas = Empresa.objects.filter(sector = codigo_Sector)
+
+        # Para calcular el promedio del ratio financiero
+        promedio_ratio = 0
+        try:
+            if empresas.first():
+                empresa_ratio = []
+                for empresa in empresas:
+                    recibe_ratios = calcula_ratiosFin(anio_benchmark, empresa)
+                    for ratio in recibe_ratios:
+                        if ratio['nombre'] == nombre_Ratio:
+                            ratio_calculado = round(ratio['valor'], 2)
+                            promedio_ratio += ratio_calculado
+                    empresa_ratio.append({'empresa':empresa, 'valor': ratio_calculado})
+
+            # Calculando el promedio del ratio financiero
+            promedio_ratio = promedio_ratio/len(empresas)
+
+            # Diccionario destinado para template
+            context['empresas'] = empresa_ratio
+            context['promedio_ratio'] = round(promedio_ratio,2)
+            context['nombre_ratio'] = nombre_Ratio.upper()
+            context['nombre_sector'] = empresas.first().sector
+            context['anio_benchmark'] = anio_benchmark
+            return render(request, self.template_name, context)
+        except:
+            messages.error(request, 'Lo sentimos, no fue posible ejecutar la instrucción')
+            return redirect('conta:ver_benchmark')
+
+#
+# Calcula los ratios como la función anterior, con la única
+# diferencia que en parametros tiene una variación
+#
+def calcula_ratiosFin(anio, empresa):
+    emprsa = Empresa.objects.get(id = empresa.id)
+    
+    # Cuentas necesarias para calcular ratios financieros
+    activoCorriente = Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    pasivoCorriente = Transaccion.objects.filter(cuenta__cuenta_ratio="PSVC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    inventario = Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    activosTotales = Transaccion.objects.filter(cuenta__cuenta_ratio="ACTV", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    efectivo = Transaccion.objects.filter(cuenta__cuenta_ratio="EFCT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    valoresCortoPlazo = Transaccion.objects.filter(cuenta__cuenta_ratio="VLRS", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    costoDeVenta = Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    ventasNetas = Transaccion.objects.filter(cuenta__cuenta_ratio="VNTSN", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first().monto
+    cuentasPorPagarComerciales = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    cuentasPorCobrarComerciales = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto    
+    cuentasPorCobrarComercialesAnterior = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPC", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()  
+    cuentasPorPagarComercialesAnterior = Transaccion.objects.filter(cuenta__cuenta_ratio="CNTAPP", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio-1).first()   
+    inventarioAnterior = Transaccion.objects.filter(cuenta__cuenta_ratio="INVT", cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio-1).first()
+    compras = Transaccion.objects.filter(cuenta__cuenta_ratio="CSTDV", cuenta__catalogo=emprsa.catalogo_empresa,fecha_creacion__year=anio).first().monto
+    
+    # Razon Circulante
+    razonCirculante = activoCorriente/pasivoCorriente
+    # Prueba Acida
+    pruebaAcida=(activoCorriente-inventario)/pasivoCorriente
+    # Razon de Capital de Trabajo
+    razonCapitalTrabajo=(activoCorriente-pasivoCorriente)/activosTotales
+    # Razon de Efectivo
+    razonEfectivo=(efectivo+valoresCortoPlazo)/pasivoCorriente
+    # Razon de Rotacion de Inventario y Dias de Inventario
+    if inventarioAnterior:
+        razonRotacionInventario = costoDeVenta /((inventario+inventarioAnterior.monto)/2)
+        razonDiasInventario = ((inventario+inventarioAnterior.monto)/2)/(costoDeVenta/365)
+    else:
+        razonRotacionInventario = costoDeVenta/inventario
+        razonDiasInventario = inventario/(costoDeVenta/365)
+    # Razon de Rotacion de Cuentas por Cobrar y Periodo Medio de Cobranza
+    if cuentasPorCobrarComercialesAnterior:
+        razonRotacionCuentasPorCobrar=ventasNetas/((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)
+        razonPeriodoMedioCobranza=(((cuentasPorCobrarComerciales+cuentasPorCobrarComercialesAnterior.monto)/2)*365)/ventasNetas
+    else:
+        razonRotacionCuentasPorCobrar=ventasNetas/cuentasPorCobrarComerciales
+        razonPeriodoMedioCobranza=(cuentasPorCobrarComerciales*365)/ventasNetas
+    # Razon de Rotacion de Cuentas por Pagar y Periodo Medio de Pago
+    if cuentasPorPagarComercialesAnterior:
+        razonRotacionCuentasPorPagar=compras/((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)
+        periodoMedioPago=(((cuentasPorPagarComerciales+cuentasPorPagarComercialesAnterior.monto)/2)*365)/compras
+    else:
+        razonRotacionCuentasPorPagar=compras/cuentasPorPagarComerciales
+        periodoMedioPago=(cuentasPorPagarComerciales*365)/compras
+
+    ratios=[
+        {"nombre":"Razón circulante","valor":razonCirculante},
+        {"nombre":"Prueba ácida","valor":pruebaAcida},
+        {"nombre":"Razón de capital de trabajo","valor":razonCapitalTrabajo},
+        {"nombre":"Razón de efectivo","valor":razonEfectivo},
+        {"nombre":"Razón de rotación de inventario","valor":razonRotacionInventario},
+        {"nombre":"Razón de días de inventario","valor":razonDiasInventario},
+        {"nombre":"Razón de rotación de cuentas por cobrar","valor":razonRotacionCuentasPorCobrar},
+        {"nombre":"Razón de período medio de cobranza","valor":razonPeriodoMedioCobranza},
+        {"nombre":"Razón de rotación de cuentas por pagar","valor":razonRotacionCuentasPorPagar},
+        {"nombre":"Período medio de pago","valor":periodoMedioPago}
+    ]
+    return ratios

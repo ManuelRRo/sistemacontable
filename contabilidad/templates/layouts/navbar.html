@@ -61,10 +61,28 @@
 </div>
 {% else %}
 <div class="sidebar close">
-  <a href="#" class="logo">
+  <a href="{% url "conta:home" %}" class="logo">
     <i class='bx bx-wallet bx-flashing'></i>
     <div class="logo-name">Analyti<span>Fin</span></div>
   </a>
+  {% if user.is_superuser %}
+  <ul class="side-menu">
+    <li class="active">
+      <a href="{% url "conta:home" %}">
+        <i class='bx bxs-dashboard'></i>
+        Inicio
+      </a>
+    </li>
+  </ul>
+  <ul class="side-menu">
+    <li>
+      <a href="{% url 'logout'%}" class="logout">
+        <i class="bx fa-solid fa-arrow-right-from-bracket"></i>
+        Cerrar Sesión
+      </a>
+    </li>
+  </ul>
+  {% endif %}
 </div>
 {% endif %}
 <!-- End of Sidebar -->
