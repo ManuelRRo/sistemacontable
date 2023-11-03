@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from plotly.io import to_image
 from io import BytesIO
 import base64
+import json
 
 
 #HU-002-Registrar empresa con catálogo, BGN Y ERS en formato excel
@@ -612,7 +613,9 @@ def calcular_ratios(request):
         year_2 = timezone.now().strftime('%Y-%m-%d')  
     return render(request,"ratios/calcular-ratios.html",{'ratios':ratios,'empresa':emprsa})
 
-def comparacionRatiosEmpresas(request):
+def comparacionRatiosEmpresasPromedio(request):
+    if request.method=="POST":
+        activosTotales=Transaccion.objects.filter()
     try:
         propietarioemprsa = get_object_or_404(Propietario,user=request.user)
 
@@ -627,8 +630,12 @@ def comparacionRatiosEmpresas(request):
 
     anio=2023
     activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first()
-    empresa1 = get_object_or_404(Empresa,id=1)
-    empresa2 = get_object_or_404(Empresa,id=2)
+    empresa1 = get_object_or_404(Empresa,propietario=propietarioemprsa)
+    empresa2 = get_object_or_404(Empresa,id=8)
+    empresas=[
+        {"nombre":empresa1},
+        {"nombre":empresa2}
+    ]
     ratios1=[]
     ratios2=[]
     if activoCorriente is None:
@@ -640,15 +647,103 @@ def comparacionRatiosEmpresas(request):
         ratios2=funcionRatios(anio,request,empresa2)
     
     promedios=[
-
+        {"nombre":"Razón circulante"},
+        {"nombre":"Prueba ácida"},
+        {"nombre":"Razón de capital de trabajo"},
+        {"nombre":"Razón de efectivo"},
+        {"nombre":"Razón de rotación de inventario"},
+        {"nombre":"Razón de días de inventario"},
+        {"nombre":"Razón de rotación de cuentas por cobrar"},
+        {"nombre":"Razón de período medio de cobranza"},
+        {"nombre":"Razón de rotación de cuentas por pagar"},
+        {"nombre":"Período medio de pago"}
     ]
-    for ratio1, ratio2 in zip(ratios1, ratios2):
-        promedio = {
-            'ratio1': ratio1['valor'],
-            'ratio2': ratio2['valor'],
-            'promedio': (ratio1['valor'] + ratio2['valor']) / 2
-        }
-        promedios.append(promedio) 
+    for elemento,ratio1, ratio2 in zip(promedios,ratios1, ratios2):
+        promedio=(ratio1['valor'] + ratio2['valor']) / 2
+
+        elemento['ratio1']=ratio1['valor']
+        elemento['ratio2']= ratio2['valor']
+        elemento['promedio']=promedio
     
-    
-    return render(request,"ratios/comparacion-empresas-ratios.html",{'ratios1':ratios1,'ratios2':ratios2,'promedios':promedios,'empresa1':empresa1,'empresa2':empresa2})
+        if ratio1['valor']>=promedio:
+            elemento['ratio1esMayor']=True
+        else:
+            elemento['ratio1esMayor']=False
+
+        if ratio2['valor']>=promedio:
+            elemento['ratio2esMayor']=True
+        else:
+            elemento['ratio2esMayor']=False
+    return render(request,"ratios/comparacion-empresas-ratios-promedio.html",{'promedios':promedios,'empresas':empresas,'miempresa':empresa1})
+
+def comparacionRatiosEmpresasValor(request):
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+    empresas=[]
+    ratiosIngresados=[]
+    ratiosFinales=[]
+    if request.method=="POST":
+        razonCirculante=request.POST.get("razonCirculante")
+        pruebaAcida=request.POST.get("pruebaAcida")
+        razonCapitalTrabajo=request.POST.get("razonCapitalTrabajo")
+        razonEfectivo=request.POST.get("razonEfectivo")
+        razonRotacionInventario=request.POST.get("razonRotacionInventario")
+        razonDiasInventario=request.POST.get("razonDiasInventario")
+        razonRotacionCuentasPorCobrar=request.POST.get("razonRotacionCuentasCobrar")
+        razonPeriodoMedioCobranza=request.POST.get("razonPeriodoMedioCobranza")
+        razonRotacionCuentasPorPagar=request.POST.get("razonRotacionCuentasPagar")
+        periodoMedioPago=request.POST.get("periodoMedioPago")
+        ratiosIngresados=[
+            {"nombre":"Razón circulante","valor":razonCirculante},
+            {"nombre":"Prueba ácida","valor":pruebaAcida},
+            {"nombre":"Razón de capital de trabajo","valor":razonCapitalTrabajo},
+            {"nombre":"Razón de efectivo","valor":razonEfectivo},
+            {"nombre":"Razón de rotación de inventario","valor":razonRotacionInventario},
+            {"nombre":"Razón de días de inventario","valor":razonDiasInventario},
+            {"nombre":"Razón de rotación de cuentas por cobrar","valor":razonRotacionCuentasPorCobrar},
+            {"nombre":"Razón de período medio de cobranza","valor":razonPeriodoMedioCobranza},
+            {"nombre":"Razón de rotación de cuentas por pagar","valor":razonRotacionCuentasPorPagar},
+            {"nombre":"Período medio de pago","valor":periodoMedioPago}
+        ]
+        anio=2023
+        empresa2 = get_object_or_404(Empresa,id=8)
+        empresas=[
+        {"nombre":emprsa.nombre_empresa},
+        {"nombre":empresa2.nombre_empresa}
+        ]
+        ratios1=funcionRatios(anio,request,None)
+        ratios2=funcionRatios(anio,request,empresa2)
+
+        
+        for ratioIngresado,ratio1, ratio2 in zip(ratiosIngresados,ratios1, ratios2):
+            ratioFinal={}
+            if ratioIngresado['valor']:
+                ratioFinal['nombre']=ratioIngresado['nombre']
+                ratioFinal['ratio1']=ratio1['valor']
+                ratioFinal['ratio2']= ratio2['valor']
+                ratioFinal['valor']=ratioIngresado['valor']
+            
+                if ratio1['valor']>=float(ratioIngresado['valor']):
+                    ratioFinal['ratio1esMayor']=True
+                else:
+                    ratioFinal['ratio1esMayor']=False
+
+                if ratio2['valor']>=float(ratioIngresado['valor']):
+                    ratioFinal['ratio2esMayor']=True
+                else:
+                    ratioFinal['ratio2esMayor']=False
+                ratiosFinales.append(ratioFinal)
+        return render(request,"ratios/comparacionPorValorSalida.html",{"ratios":ratiosFinales,"empresas":empresas,"miempresa":emprsa})
+    return render(request,"ratios/comparacionPorValorEntrada.html",{"empresa":emprsa,"ratios":ratiosFinales,"empresas":empresas})
+
+def compararRatiosPorPromedioOvalorIngresa(request):
+    pass
