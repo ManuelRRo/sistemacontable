@@ -71,7 +71,7 @@ body{
     width: 60px;
 }
 
-.sidebar .logo{
+.logo{
     font-size: 24px;
     font-weight: 700;
     height: 56px;
@@ -83,11 +83,11 @@ body{
     box-sizing: content-box;
 }
 
-.sidebar .logo .logo-name span{
+.logo .logo-name span{
     color: var(--dark);
 }
 
-.sidebar .logo .bx{
+.logo .bx{
     min-width: 60px;
     display: flex;
     justify-content: center;
@@ -508,6 +508,11 @@ body{
 
 .content main .bottom-data .reminders .task-list li:last-child{
    margin-bottom: 0;
+}
+
+.card-content:hover{
+    background: var(--light);
+    border-color: var(--light);
 }
 
 @media screen and (max-width: 768px) {

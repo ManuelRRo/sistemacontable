@@ -1,0 +1,106 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    Benchmark | AnalytiFin
+{% endblock %}
+
+{% block content %}
+    <div class="header">
+        <div class="left">
+            <h1>Benchmark</h1>
+            <ul class="breadcrumb">
+                <li><a href="#">
+                        AnalytiFin
+                    </a></li>
+                /
+                <li><a href="#" class="active">Inicio</a></li>
+                /
+                <li><a href="#" class="active">Benchmark</a></li>
+            </ul>
+        </div>
+    </div> 
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-10">
+                <form method="post"> {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xl-4 col-md-6 col-sm-8">
+                            <div class="mb-3">
+                                <label for="select_Ratio" class="form-label">Ratio Financiero</label>
+                                <select class="form-select" id="select_Ratio" name="select_Ratio" required>
+                                    <option value="" selected disabled>{% if nombre_ratio %}{{nombre_ratio}} {% else %} Seleccione el Ratio Financiero {% endif %}</option>
+                                    <option value="Razón circulante">Razón Circulante</option>
+                                    <option value="Prueba ácida">Prueba ácida</option>
+                                    <option value="Razón de capital de trabajo">Razón de Capital de Trabajo</option>
+                                    <option value="Razón de efectivo">Razón de Efectivo</option>
+                                    <option value="Razón de rotación de inventario">Razón de Rotación de Inventario</option>
+                                    <option value="Razón de días de inventario">Razón de Días de Inventario</option>
+                                    <option value="Razón de rotación de cuentas por cobrar">Razón de Rotación de Cuentas por Cobrar</option>
+                                    <option value="Razón de período medio de cobranza">Razón de Período Medio de Cobranza</option>
+                                    <option value="Razón de rotación de cuentas por pagar">Razón de Rotación de Cuentas por Pagar</option>
+                                    <option value="Período medio de pago">Período Medio de Pago</option>
+                                </select>                    
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-8">
+                            <div class="mb-3">
+                                <label for="select_Sector" class="form-label">Sector</label>
+                                <select class="form-select" id="select_Sector" name="select_Sector" required>
+                                    <option value="" selected disabled>{% if nombre_sector %}{{nombre_sector}} {% else %}Seleccione el Sector{% endif %}</option>
+                                    {% for sector in sectores %}
+                                    <option value="{{sector.0}}">{{sector.1}}</option>
+                                    {% endfor %}  
+                                </select>                    
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-8">
+                            <div class="mb-3">
+                                <label for="anio_benchmark" class="form-label">Año</label>
+                                <input class="form-control" type="number" name="anio_benchmark" id="anio_benchmark" min="2000" {% if anio_benchmark %} value="{{anio_benchmark}}"{% else %}value="2023"{% endif %} required>                    
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div>
+                            <button type="submit" class="btn btn-success">Enviar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% if empresas %}
+    <div class="container mt-3">
+        <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 1px">
+            <div class="progress-bar" style="width: 25%"></div>
+        </div>
+        <div class="mt-3">
+            <h6 class="fw-bolder">{{nombre_ratio}}  <span class="badge bg-secondary fw-lighter">{{promedio_ratio}}</span></h6>
+        </div>
+        <p>
+            {% for sector in sectores %}
+                {% if sector.0 == nombre_sector %}
+                    Empresas de {{sector.1}} {{anio_benchmark}}
+                {% endif %}
+            {% endfor %} 
+        </p>
+        <div class="row">
+            {% for empresa in empresas %}
+                {% if empresa.valor >= promedio_ratio %}
+                <div class="col-xl-4 col-sm-6 mb-3">
+                    <div class="card rounded-4 card-content">
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <span class="badge bg-primary fw-lighter">{{empresa.valor}}</span>
+                            </div>
+                            {{empresa.empresa}}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+{% endblock %}

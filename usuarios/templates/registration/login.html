@@ -17,6 +17,9 @@
     <!--Cargar la librería de Boxicons-->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
+    <!-- Cargar la librería Font Awesome para iconos -->
+    <script data-search-pseudo-elements defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/js/all.min.js" crossorigin="anonymous"></script>
+
 </head>
 
 <body class="d-flex justify-content-center align-items-center">
@@ -46,7 +49,20 @@
                 </button>
             </div>
         </form>
-        
+        {% if messages %}
+        {% for message in messages %}
+
+        <div class="container-xl mt-4">
+            <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                <i class='bx bxs-bell-ring bx-tada'></i>
+                <strong>Notificación</strong> 
+                <p>{{message}}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+        {% endfor %}
+        {% endif %}
 
     </div>
 
