@@ -295,6 +295,7 @@ def graficoRatios(request):
                 return render(request, 'graficos/ratios.html', {'ratios': ratios})
             if len(ratios_seleccionados) < 5:
                 messages.error(request, "Se deben seleccionar al menos 5 ratios")
+                print("valor request al select 1",request.POST)
                 return render(request, 'graficos/ratios.html', {'ratios': ratios})
             if año_final - año_inicio < 2:
                 messages.error(request, "El rango de fechas debe ser de al menos 3 año")
@@ -362,39 +363,39 @@ def cargarBalanceGeneral(request):
         print("No tiene empresa registrada")
         
     contexto = {}    
-    totalactivos = 0
-    total = 0
     year_1 = ""
     year_2 = ""
-    lista_trans = Transaccion.objects.all()
-   
-    diccionario_cuentas = {}
+    
     #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
     if request.method == "POST":
-        year_1 = request.POST['fechainicio']# retorna como anio-mes-dia
-        year_2 = request.POST['fechafinal']# retorna como anio-mes-dia
-    else:
-        year_1 = timezone.now().strftime('%Y-%m-%d')
-        year_2 = timezone.now().strftime('%Y-%m-%d')
+        try:
+            #la fecha debe ser de tipo datetime.date(anio,mes,dia)
+            year_1 = datetime.strptime(request.POST['fechainicio'], "%Y-%m-%d").date()# retorna como anio-mes-dia
+            year_2 = datetime.strptime(request.POST['fechafinal'], "%Y-%m-%d").date()# retorna como anio-mes-dia
 
-    try:
-        contexto = sumarTransacciones(request)
-        print("contexto_)sumas",contexto)
-    except Exception as e:
-        error_message = f"Se produjo una excepción: {str(e)}"
-        print(error_message)
-        print("Problema en sumarTrasnsacciones")
+            contexto = sumarTransacciones(request,year_1,year_2)
+
+            print("contexto_)sumas",contexto)
+        except Exception as e:
+            error_message = f"Se produjo una excepción: {str(e)}"
+            print(error_message)
+            print("Problema en sumar Trasnsacciones")
+        return render(request,'balance/listar-balance.html',contexto)
+    else:
+        try:
+            year_1 = timezone.now().strftime('%Y-%m-%d')
+            year_2 = timezone.now().strftime('%Y-%m-%d')
+
+        
+            contexto = sumarTransacciones(request,op=0)
+        except Exception as e:
+            error_message = f"Se produjo una excepción: {str(e)}"
+            print(error_message)
+
+        return render(request,'balance/listar-balance.html',contexto)
     
-    year_1 = timezone.now().year
-    year_2 = timezone.now().year
-    try:
-        contexto = sumarTransacciones(request,op=0)
-    except Exception as e:
-        error_message = f"Se produjo una excepción: {str(e)}"
-        print(error_message)
-    return render(request,
-           'balance/listar-balance.html'
-           ,contexto)
+   
+   
 
 def sumarTransacciones(request,year_1=None,year_2=None,op=1):
     cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
@@ -404,6 +405,7 @@ def sumarTransacciones(request,year_1=None,year_2=None,op=1):
     total = 0
     anio_1 = ""
     anio_2 = ""
+    id_transaccion = 0
     if op == 1:
         anio_1 = year_1
         anio_2 = year_2
@@ -411,6 +413,7 @@ def sumarTransacciones(request,year_1=None,year_2=None,op=1):
         #date(anio,mes,dia)
         anio_1 = date(timezone.now().year,1,1)
         anio_2 = date(timezone.now().year,12,31)
+        print("tip y valor",type(anio_1),anio_1)
 
     for cuenta in cuentasActivos:
         saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
@@ -419,30 +422,32 @@ def sumarTransacciones(request,year_1=None,year_2=None,op=1):
         saldoDebito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
                                                     fecha_creacion__range=(anio_1,anio_2)
                                                 ).aggregate(total=Sum('monto'))
-        try:
-            id_trans = cuenta.transacciones.get(naturaleza=Transaccion.Naturaleza.DEBITO,fecha_creacion__range=(anio_1,anio_2))
-            print(id_trans)
-        except Exception as e:
-            error_message = f"Se produjo una excepción: {str(e)}"
-            print("saldo debito pk",type(id_trans))
-
+        
         if saldoCredito["total"] is None:
             saldoCredito["total"] = Decimal(0.0)
         if saldoDebito["total"] is None:
             saldoDebito["total"] = Decimal(0.0)
         total = saldoDebito["total"] - saldoCredito["total"]
-        totalactivos += total 
+        totalactivos += total
 
-        
+        # try:
+        #     id_trans = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
+        #                                            fecha_creacion__range=(anio_1,anio_2))
+        #     if len(id_trans) != 0:
+        #         id_transaccion = id_trans[0]
+        #         print("Valor id trans",id_transaccion.)
+        # except Exception as e:
+        #     error_message = f"Se produjo una excepción: {str(e)}"
+        #     print("saldo debito pk",type(id_trans))
+        #     print(error_message)
 
         diccionario_cuentas[cuenta] = {
         'saldo_credito': saldoCredito["total"],
         'saldo_debito': saldoDebito["total"],
         'total': total,
-        'num_cuenta': id_trans.pk
+        'num_cuenta': 0,#id_transaccion.pk
         }
-
-
+         
     contexto = {'cuentasActivos': cuentasActivos,
         'totalActivos': total,
         'diccionario_cuentas':diccionario_cuentas,
