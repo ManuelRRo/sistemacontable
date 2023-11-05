@@ -493,31 +493,61 @@ def cargarBalanceGeneral(request):
 
         return render(request,'balance/listar-balance.html',contexto)
     
-   
-   
+#Funcion que no se usa
+# def seleccionar_trans_cate(categoria, anio,request_,total_cuenta):
+#         lista = []
+#         cuentas = request_.user.propietario.empresa.catalogo_empresa.cuentas.all()
+#         for cuenta in cuentas.filter(categoria=Cuenta.Categoria.ACTIVO):
+#             #print("cuenta: ", (cuenta.transacciones.all().filter(fecha_creacion__year=2022).first().monto/total_cuenta)*100)     
+#             lista.append((cuenta.transacciones.all().filter(fecha_creacion__year=2022).first().monto/total_cuenta)*100)   
+#         return lista
 
-def sumarTransacciones(request,year_1=None,year_2=None,op=1):
+def sumarTransacciones(request,year_1=None,year_2=None,year_3=None,op=1):
     cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
     diccionario_cuentas = {}
     contexto = {}
     totalactivos = 0
+    total_activos = 0
+    total_pasivos = 0
+    total_capital = 0
+    total_ventas = 0
     total = 0
     anio_1 = ""
     anio_2 = ""
+    anio_3 = ""
     id_transaccion = 0
+    a = 0
+    
     if op == 1:
         anio_1 = year_1
         anio_2 = year_2
+        anio_3 = year_3
     else:
         #date(anio,mes,dia)
         anio_1 = date(timezone.now().year,1,1)
         anio_2 = date(timezone.now().year,12,31)
-        print("tip y valor",type(anio_1),anio_1)
-
+        anio_3 = timezone.now().year
+        #print("tip y valor",type(anio_1),anio_1)
+        
     for cuenta in cuentasActivos:
+
+        #HU-06 Analisis Vertical
+        try:
+            total_activos = cuentasActivos.filter(cuenta_av=Cuenta.CuentaAV.TOTAL_ACTIVOS).first().transacciones.filter(fecha_creacion__range=(anio_1,anio_2)).first().monto
+            total_pasivos = cuentasActivos.filter(cuenta_av=Cuenta.CuentaAV.TOTAL_PASIVOS).first().transacciones.filter(fecha_creacion__range=(anio_1,anio_2)).first().monto
+            total_capital = cuentasActivos.filter(cuenta_av=Cuenta.CuentaAV.TOTAL_CAPITAL).first().transacciones.filter(fecha_creacion__range=(anio_1,anio_2)).first().monto
+            total_ventas = cuentasActivos.filter(cuenta_av=Cuenta.CuentaAV.VENTAS_TOTALES).first().transacciones.filter(fecha_creacion__range=(anio_1,anio_2)).first().monto
+        except Exception as e:
+            error_message = f"Se produjo una excepción: {str(e)}"
+            print(error_message)
+
+
         saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
                                                     fecha_creacion__range=(anio_1,anio_2)
                                                 ).aggregate(total=Sum('monto'))
+
+
+
         saldoDebito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
                                                     fecha_creacion__range=(anio_1,anio_2)
                                                 ).aggregate(total=Sum('monto'))
@@ -528,6 +558,23 @@ def sumarTransacciones(request,year_1=None,year_2=None,op=1):
             saldoDebito["total"] = Decimal(0.0)
         total = saldoDebito["total"] - saldoCredito["total"]
         totalactivos += total
+
+        #HU-06 Analisis Vertical
+        cnt = cuenta.transacciones.filter(Q(naturaleza=Transaccion.Naturaleza.DEBITO) | Q(naturaleza=Transaccion.Naturaleza.CREDITO),fecha_creacion__range=(anio_1,anio_2))
+        # print("Cuenta: ",cuenta, "Monto: ", saldoDebito/)
+        if cuenta.categoria_av == Cuenta.CategoriaAV.ACTIVO:
+            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_activos)*100)
+            a = (cnt.first().monto/total_activos)*100
+        if cuenta.categoria_av == Cuenta.CategoriaAV.PASIVO:
+            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_pasivos)*100)
+            a = (cnt.first().monto/total_pasivos)*100
+        if cuenta.categoria_av == Cuenta.CategoriaAV.PATRIMONIO:
+            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
+            a = (cnt.first().monto/total_capital)*100
+        if cuenta.categoria_av == Cuenta.CategoriaAV.ESTADO_RESULTADOS:
+            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
+            a = (cnt.first().monto/total_ventas)*100
+
 
         # try:
         #     id_trans = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
@@ -544,15 +591,34 @@ def sumarTransacciones(request,year_1=None,year_2=None,op=1):
         'saldo_credito': saldoCredito["total"],
         'saldo_debito': saldoDebito["total"],
         'total': total,
-        'num_cuenta': 0,#id_transaccion.pk
+        'num_cuenta': 0,#id_transaccion.pk,
+        'av': round(a,2),
         }
          
     contexto = {'cuentasActivos': cuentasActivos,
         'totalActivos': total,
         'diccionario_cuentas':diccionario_cuentas,
-        'pathbase':settings.BASE_DIR,}
+        'pathbase':settings.BASE_DIR,
+        'anio' : anio_3,
+        }
         
     return contexto
+
+
+#HU-06 Analisis Vertical
+def analisisVertical(request):
+    context={}
+    try:
+        year_1 = datetime.strptime(request.POST['fechainicio'], "%Y-%m-%d").date()# retorna como anio-mes-dia
+        year_2 = datetime.strptime(request.POST['fechafinal'], "%Y-%m-%d").date()# retorna como anio-mes-dia
+        year_3 = datetime.strptime(request.POST['fechainicio'], "%Y-%m-%d").year
+        context = sumarTransacciones(request,year_1,year_2,year_3,op=1)
+    except Exception as e:
+        error_message = f"Se produjo una excepción: {str(e)}"
+        #print(error_message)
+        messages.error(request, f'Seleccione una fecha')
+    return render(request,'analisis_vertical/analisis_vertical.html',context)
+#HU-06 Analisis Vertical
 
 class TransaccionUpdateView(UpdateView):
     model = Transaccion

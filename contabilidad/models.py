@@ -74,6 +74,8 @@ class Cuenta(models.Model):
         COSTOS = 'CTS', 'COSTOS DE VENTA'
         GASTOS_OPERACIONALES = 'GTOP', 'Gastos Operacionales'
         INGRESOS_OPERACIONALES = 'INOP', 'Ingresos Operacionales'
+        TOTAL_PASIVOS = 'TTPSV',"Total Capital"
+        UTILIDAD_NETA = 'UTLDD',"Utilidad Neta"
     
     class CuentaRatio(models.TextChoices):
         NINGUNA = 'NNG','Ninguna'
@@ -89,6 +91,20 @@ class Cuenta(models.Model):
         CUENTASPORPAGARCOMERCIALES = 'CNTAPP','Cuentas por pagar comerciales'
         CUENTASPORCOBRARCOMERCIALES = 'CNTAPC','Cuentas por cobrar comerciales'
     
+    class CuentaAV(models.TextChoices):
+        NINGUNA = 'NNG','Ninguna'
+        TOTAL_ACTIVOS = 'TTACT','Total Activos'
+        TOTAL_PASIVOS = 'TTPSV',"Total Pasivos"
+        TOTAL_CAPITAL = 'TTCPT',"Total Capital"
+        VENTAS_TOTALES = 'VNTST','Ventas Totales'
+    
+    class CategoriaAV(models.TextChoices):
+        NINGUNA = 'NNG','Ninguna'
+        ACTIVO ='ASV','Activo'
+        PASIVO = 'PSV','Pasivo'
+        PATRIMONIO = 'PTR','Patrimonio'
+        ESTADO_RESULTADOS = 'ESR','Estado de Resultados'
+
 
     codigo = models.CharField(max_length=255,blank=False)
     nombre = models.CharField(max_length=255,blank=False)
@@ -104,6 +120,13 @@ class Cuenta(models.Model):
     catalogo = models.ForeignKey(Catalogo,
                                  on_delete=models.CASCADE,
                                  related_name='cuentas')
+    cuenta_av = models.CharField(max_length=6,
+                                    choices=CuentaAV.choices,
+                                    default=CuentaAV.NINGUNA)
+    categoria_av = models.CharField(max_length=5, 
+                                    choices=CategoriaAV.choices,
+                                    default=CategoriaAV.NINGUNA)
+
     #Managers
     objects = models.Manager()
     cuentas_activos = CuentasDebeManager()

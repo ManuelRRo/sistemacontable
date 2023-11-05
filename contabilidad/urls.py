@@ -24,7 +24,8 @@ urlpatterns = [
     # Benchmark
     path('benchmark/', login_required(views.Benchmark.as_view()), name="ver_benchmark"),
     path('comparacion_ratios_empresas_valor/',views.comparacionRatiosEmpresasValor,name="comparacion-ratios-empresas-valor"),
-    
+    #HU-006-Analisis Vertical
+    path('analisis_vertical/',views.analisisVertical,name="analisis_vertical"),
 ]
 
 if settings.DEBUG:
