@@ -563,18 +563,17 @@ def sumarTransacciones(request,year_1=None,year_2=None,year_3=None,op=1):
         cnt = cuenta.transacciones.filter(Q(naturaleza=Transaccion.Naturaleza.DEBITO) | Q(naturaleza=Transaccion.Naturaleza.CREDITO),fecha_creacion__range=(anio_1,anio_2))
         # print("Cuenta: ",cuenta, "Monto: ", saldoDebito/)
         if cuenta.categoria_av == Cuenta.CategoriaAV.ACTIVO:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_activos)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_activos)*100)
             a = (cnt.first().monto/total_activos)*100
         if cuenta.categoria_av == Cuenta.CategoriaAV.PASIVO:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_pasivos)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_pasivos)*100)
             a = (cnt.first().monto/total_pasivos)*100
         if cuenta.categoria_av == Cuenta.CategoriaAV.PATRIMONIO:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
             a = (cnt.first().monto/total_capital)*100
         if cuenta.categoria_av == Cuenta.CategoriaAV.ESTADO_RESULTADOS:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
             a = (cnt.first().monto/total_ventas)*100
-
 
         # try:
         #     id_trans = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
@@ -618,7 +617,99 @@ def analisisVertical(request):
         #print(error_message)
         messages.error(request, f'Seleccione una fecha')
     return render(request,'analisis_vertical/analisis_vertical.html',context)
-#HU-06 Analisis Vertical
+
+
+#HU-07 Analisis Horizontal
+def calculoAHorizontal(request,year_1=None,year_2=None,year_3=None,op=1):
+    cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
+    diccionario_cuentas = {}
+    contexto = {}
+    totalactivos = 0
+    anio_1 = ""
+    anio_2 = ""
+    anio_3 = ""
+    id_transaccion = 0
+    b = 0
+    c = 0
+    
+    if op == 1:
+        anio_1 = year_1
+        anio_2 = year_2
+        anio_3 = year_3
+    else:
+        #date(anio,mes,dia)
+        anio_1 = date(timezone.now().year,1,1)
+        anio_2 = date(timezone.now().year,12,31)
+        anio_3 = timezone.now().year
+        #print("tip y valor",type(anio_1),anio_1)
+        
+    for cuenta in cuentasActivos:
+
+        saldoCredito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.CREDITO,
+                                                    fecha_creacion__range=(anio_1,anio_2)
+                                                ).aggregate(total=Sum('monto'))
+
+
+        saldoDebito = cuenta.transacciones.filter(naturaleza=Transaccion.Naturaleza.DEBITO,
+                                                    fecha_creacion__range=(anio_1,anio_2)
+                                                ).aggregate(total=Sum('monto'))
+        
+        if saldoCredito["total"] is None:
+            saldoCredito["total"] = Decimal(0.0)
+        if saldoDebito["total"] is None:
+            saldoDebito["total"] = Decimal(0.0)
+        total = saldoDebito["total"] - saldoCredito["total"]
+        totalactivos += total
+
+        # Obtén el saldo de la cuenta en 2022
+        saldo_aniomenor = Transaccion.objects.filter(cuenta=cuenta, fecha_creacion__year=year_1.year).first().monto
+        # Obtén el saldo de la cuenta en 2023
+        saldo_aniomayor = Transaccion.objects.filter(cuenta=cuenta, fecha_creacion__year=year_2.year).first().monto
+
+        # Calcula el análisis horizontal variacion absoluta
+        b = saldo_aniomayor - saldo_aniomenor
+        #Calcular el análisis horizontal variacion relativa
+        if saldo_aniomenor != 0:
+            c = ((saldo_aniomayor / saldo_aniomenor) - 1) * 100
+        else:
+            c = 0
+
+        #print("Nombre cuenta:", cuenta.nombre)
+        #print("Saldo 2023:", saldo_aniomayor)
+        #print("Saldo 2022:", saldo_aniomenor)
+        #print("Análisis Horizontal:", b)
+
+        diccionario_cuentas[cuenta] = {
+        'saldo_credito': saldoCredito["total"],
+        'saldo_debito': saldoDebito["total"],
+        'total': total,
+        'num_cuenta': 0,#id_transaccion.pk,
+        'ahVA': round(b,2),
+        'ahVR': round(c,2),
+
+        }
+         
+    contexto = {'cuentasActivos': cuentasActivos,
+        'totalActivos': total,
+        'diccionario_cuentas':diccionario_cuentas,
+        'pathbase':settings.BASE_DIR,
+        }
+        
+    return contexto
+
+
+#HU-07 Analisis Horizontal
+def analisisHorizontal(request):
+    context={}
+    try:
+        year_1 = datetime.strptime(request.POST['fechainicio'], "%Y-%m-%d").date()# retorna como anio-mes-dia
+        year_2 = datetime.strptime(request.POST['fechafinal'], "%Y-%m-%d").date()# retorna como anio-mes-dia
+        context = calculoAHorizontal(request,year_1,year_2,op=1)
+    except Exception as e:
+        error_message = f"Se produjo una excepción: {str(e)}"
+        print(error_message)
+        messages.error(request, f'Seleccione una fecha')
+    return render(request,'analisis_horizontal/analisis_horizontal.html',context)
 
 class TransaccionUpdateView(UpdateView):
     model = Transaccion

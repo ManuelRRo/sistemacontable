@@ -1,0 +1,53 @@
+
+{% extends "layouts/base.html" %}
+{% block title %} Analisis Horizontal {% endblock %}
+
+{% block content %}
+{% if user.propietario.empresactiva %}
+   <h1>Análisis Horizontal</h1>
+
+   <table class="table table-bordered table-hover">
+       <thead>
+           <th>Cuenta</th>
+           <th>Valor {{anio}}</th>
+           <th>Variación Absoluta</th>
+           <th>Varaiación Relativa</th>
+       </thead>
+       <tbody>
+           
+           {% for cuenta, valores in diccionario_cuentas.items %}
+           <tr>
+               <td>{{ cuenta }}</td>
+               <td>{{ valores.total }}</td>
+                <td>{{ valores.ahVA }}</td>
+                <td>{{ valores.ahVR }} % </td>
+
+           </tr>
+           {% endfor %}
+           
+       </tbody>
+   </table>
+
+
+{% else %}
+
+<h1>Debe registrar su empresa</h1>
+
+{% endif %}
+
+{% endblock %}
+
+{% block filtros%}
+{% if user.propietario.empresactiva %}
+<form method="post">
+   {% csrf_token %}
+   <label for="fname">Fecha inicial</label><br>
+   <input type="date" id="año" name="fechainicio" value="Año"><br>
+
+   <label for="fame">Fecha final</label><br>
+   <input type="date" id="año" name="fechafinal" value="Año"><br>
+   
+   <input type="submit" value="Enviar">
+    </form> 
+ {% endif %}
+{% endblock %}
