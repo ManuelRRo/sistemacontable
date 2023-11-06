@@ -66,9 +66,17 @@ WSGI_APPLICATION = 'sistemacontable.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'mydatabase': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',   # Database engine
+        'NAME': 'dbanfav',           # Name of your MySQL database
+        'USER': 'root',           # MySQL database user
+        'PASSWORD': 'rootpassword',   # Password for the user
+        'HOST': '127.0.0.1',                    # Host where the MySQL server is running
+        'PORT': '5004',                         # Port on which MySQL is running
     }
 }
 
