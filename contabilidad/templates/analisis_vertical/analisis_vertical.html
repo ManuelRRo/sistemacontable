@@ -1,32 +1,28 @@
 
 {% extends "layouts/base.html" %}
-{% block title %}Transacciones{% endblock %}
+{% block title %} Analisis Vertical {% endblock %}
 
 {% block content %}
-   {% if user.propietario.empresactiva %}
-   <h1>Balance General</h1>
+{% if user.propietario.empresactiva %}
+   <h1>Análisis Vertical</h1>
 
-   <table class="table table-bordered">
+   <table class="table table-bordered table-hover">
        <thead>
            <th>Cuenta</th>
-           <!-- <th>Debe</th>
-           <th>Haber</th> -->
-           <th>Total</th>
-           {%for anio in rango_anios%}
-                <th>{{anio}}</th>
-           {%endfor%}
-           <th>funciones</th>
+           <th>Valor {{anio}}</th>
+           <th>Análisis Vertical</th>
        </thead>
        <tbody>
            
            {% for cuenta, valores in diccionario_cuentas.items %}
            <tr>
                <td>{{ cuenta }}</td>
-               <!-- <td>{{ valores.saldo_debito }}</td>  debe -->
-               <!-- <td>{{ valores.saldo_credito }}</td> Haber -->
                <td>{{ valores.total }}</td>
-               <td></td>
-               <td><a href="{% url 'conta:actualizar-monto' valores.num_cuenta %}" class="btn btn-primary">Actualizar</a></td>
+                {% if valores.av == 100 %}
+                    <td style="color: red;">{{ valores.av }} %</td>
+                {% else %}
+                    <td>{{ valores.av }} %</td>
+                {% endif %}
            </tr>
            {% endfor %}
            
@@ -41,7 +37,6 @@
 {% endif %}
 
 {% endblock %}
-
 
 {% block filtros%}
 {% if user.propietario.empresactiva %}

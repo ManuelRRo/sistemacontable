@@ -11,9 +11,9 @@ def login_user(request):
         user = authenticate(request,username = username,password = password,)
         if user is not None:
             login(request,user)
-            return redirect('conta:transaccion-lista')
+            return redirect('conta:home')
         else:
-            messages.success(request,("There Was An Error,Try Login Again"))
+            messages.error(request,("Lo sentimos, las credenciales que ingresaste no son correctas. Por favor, verifica tu nombre de usuario y contraseña e inténtalo de nuevo."))
             return redirect('login')
 
     else:
@@ -29,6 +29,7 @@ def register_user(request):
             return redirect('login')
         else:
             context['form'] = register_form
+            messages.error(request,("Lo sentimos, no fue posible registrarte con estas credenciales. Por favor, intentalo nuevamente con otras credenciales"))
             return render(request,'registration/sign_up.html',context)
             
     else:

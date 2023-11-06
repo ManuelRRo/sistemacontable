@@ -1,70 +1,60 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}
-    ANF115 | Ratios
+    ANF115 | Estado de Resultados
 {% endblock %}
 
-{% block content %}  
-{% if ratios %}
-<form action="" method="POST">
-    {% csrf_token %}
-    <p>Año:</p>
-<select name="selectAño" id="" required class="form-select"> 
-    {% for año in listaAños %}
-    <option value="{{año.anio}}">{{año.anio}}</option>
-    {% endfor %}
-</select>
-<button type="submit" class="btn btn-primary">Calcular</button>
-</form>
-<div class="d-flex justify-content-center mt-3">
-    {{anio}}
-</div>
+{% block content %}    
 
-{% endif %}
-    {% if ratios %}
+    {% if cuentas %}
     <h4 class="text-center mt-4">{{empresa}}</h4>
     <div class="text-center fw-400 mb-3">
-        Ratios
+        Balance General
     </div>
     <div class="table-responsive">
-        
         <table class="table table-borderless table-hover">
             <thead>
-                <th>Nombre</th>
-                <th>Valor</th>
+                <tr>
+                    <th>Código</th>
+                    <th class="text-center">Cuenta</th>
+                    {% for anio in rango_de_anios %}
+                    <th class="text-end">{{anio}}</th>
+                    {% endfor %}
+                </tr>
             </thead>
             <tbody>
-                {% for ratio in ratios %}
+                {% for elemento in cuentas %}
                 <tr>
-                    <td>{{ratio.nombre}}</td>
-                    <td>{{ratio.valor|floatformat:2}}</td>                 
+                    <td> 
+                        
+                        {{elemento.cuenta.codigo}}
+                        
+                    </td>
+                    <td >
+                        {{elemento.cuenta.nombre}}
+                    </td>
+                    {% for anio, transacciones in transacciones_por_anio.items %}
+                    {% for transaccion in transacciones %}
+                    {% if transaccion.cuenta.codigo == elemento.cuenta.codigo %}
+                    <td >
+                        $ {{transaccion.monto}}
+                        <a class="btn btn-primary" href="{%url 'conta:actualizar-monto' transaccion.pk %}">Actualizar</a>
+                    </td>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+    
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-    
     </div>
-    {% else %}
-    <div class="d-flex justify-content-center">
-        <div class="container">
-            <div class="col-12"></div>
-            <strong>No se han asignado las cuentas para el cálculo de ratios</strong>
-        </div>
-        <div class="container">
-            <div class="col-12"></div>
-            <a href="{% url 'conta:crear-cuentas-ratios'%}" class="btn btn-primary">Definir Cuentas para calcular los Ratios</a>
-        </div>
-    </div>
-    
     {% endif %}
-    
     
 {% endblock %}
 
 {% block filtros%}
 </br>
-
-<!--
 <form method="post" onsubmit="return validarFechas()">
     {% csrf_token %}
     <label for="fechainicio">Fecha inicial</label><br>
@@ -89,5 +79,4 @@
         return true;  // Permite que el formulario se envíe si las fechas son válidas
     }
 </script>
--->
 {% endblock %}

@@ -14,41 +14,67 @@
     <link rel="stylesheet" href="{% static "css/login.css" %}">
     <link rel="stylesheet" href="{% static "css/bootstrap.css" %}">
 
+    <!--Cargar la librería de Boxicons-->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
 </head>
 
 <body class="d-flex justify-content-center align-items-center">
     
-    <div class="shadow p-4 mb-5 col-lg-4 col-8 bg-body-tertiary rounded-4 border">
+    <div class="shadow p-4 mb-5 col-lg-6 col-8 bg-body-tertiary rounded-4 border">
+        {% if messages %}
+        {% for message in messages %}
+
+        <div class="mb-4">
+            <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                <i class='bx bxs-bell-ring bx-tada'></i>
+                <strong>Notificación</strong> 
+                <p>{{message}}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+        {% endfor %}
+        {% endif %}
         <h5 class="text-center fw-bold">Regístrate</h5>
         <h6>Si ya te has registrado, puedes ingresar desde aquí: <a href="{%url 'login'%}" class="mr-4">Iniciar Sesión</a></h6>
         <form action="" method="POST">
             {% csrf_token %}
-            <div class="mb-4">
-                <label for="exampleInputEmail1" class="form-label">Usuario</label>
-                {{form.username}}
+            <div class="row">
+                <div class="col-6">
+                    <div class="mb-4">
+                        <label for="exampleInputEmail1" class="form-label">Usuario</label>
+                        {{form.username}}
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="mb-4 ">
+                        <label for="exampleInputPassword1" class="form-label">Correo</label>
+                       {{form.email}}
+                    </div>
+                </div>
             </div>
-            <div class="mb-4 ">
-                <label for="exampleInputPassword1" class="form-label">Correo</label>
-               {{form.email}}
-            </div>
-
-            <div class="mb-4 ">
-                <label for="exampleInputPassword1" class="form-label">Contraseña</label>
-               {{form.password1}}
-               
-            </div>
-
-            <div class="mb-4 ">
-                <label for="exampleInputPassword1" class="form-label">Confirmación Contraseña</label>
-               {{form.password2}}
-
-               {% if form.password2.errors %}
-                    <ul>
-                    {% for error in form.password2.errors %}
-                        <li><strong>{{ error|escape }}</strong></li>
-                {% endfor %}
-                    </ul>
-                {% endif %}
+            <div class="row">
+                <div class="col-6">
+                    <div class="mb-4 ">
+                        <label for="exampleInputPassword1" class="form-label">Contraseña</label>
+                       {{form.password1}} 
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="mb-4 ">
+                        <label for="exampleInputPassword1" class="form-label">Confirmación Contraseña</label>
+                       {{form.password2}}
+        
+                       {% if form.password2.errors %}
+                            <ul>
+                            {% for error in form.password2.errors %}
+                                <li><strong>{{ error|escape }}</strong></li>
+                        {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>        
+                </div>
             </div>
             <div class="text-center">
                 <button type="submit" class="btn btn-primary rounded-5">
