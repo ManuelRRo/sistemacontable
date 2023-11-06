@@ -133,7 +133,7 @@ class Cuenta(models.Model):
     cuentas_pasivos = CuentasHaberManager()
     
     def __str__(self):
-        return self.nombre+str(self.catalogo.id)
+        return self.nombre
         
 #HU-02 Modulo de transacciones
 
