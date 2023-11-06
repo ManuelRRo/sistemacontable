@@ -26,6 +26,9 @@ urlpatterns = [
     path('comparacion_ratios_empresas_valor/',views.comparacionRatiosEmpresasValor,name="comparacion-ratios-empresas-valor"),
     #HU-006-Analisis Vertical
     path('analisis_vertical/',views.analisisVertical,name="analisis_vertical"),
+    #HU-007-Analisis Horizontal
+    path('analisis_horizontal/',views.analisisHorizontal,name="analisis_horizontal"),
+    
 ]
 
 if settings.DEBUG:
