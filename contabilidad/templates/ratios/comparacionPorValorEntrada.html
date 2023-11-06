@@ -5,15 +5,43 @@
 {% endblock %}
 
 {% block content %} 
+
+{% if error is None %}
     
-<div class="d-flex justify-content-center">
-    <p>Ingrese los valores de los ratios que desea comparar, los ratios que deje en blanco no se mostrarán en la comparación</p>
-</div>    
 
 
 <div class="table-responsive">
     <form action="" method="POST">
     {% csrf_token %}
+    <table class="table table-borderless table-hover">
+        <tbody>
+            <tr>
+                <td><p>Año:</p></td>
+                <td>
+                    <select name="selectAño" id="" required class="form-select"> 
+                        {% for año in listaAños %}
+                        <option value="{{año.anio}}">{{año.anio}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><p>Empresa a comparar:</p></td>
+                <td>
+                    <select name="selectEmpresa" class="form-select" id="" required>
+                        {% for empresa in empresasSector %}
+                        {% if empresa.id != miempresa.id %}
+                        <option value="{{empresa.id}}">{{empresa}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex justify-content-center">
+        <p>Ingrese los valores de los ratios que desea comparar, los ratios que deje en blanco no se mostrarán en la comparación</p>
+    </div>
     <table class="table table-borderless table-hover">
         <thead>
             <th>Ratio</th>
@@ -67,7 +95,11 @@
     </div>
     </form>
 </div>
-    
+{% else %}
+<div class="d-flex justify-content-center">
+    <p><strong>Por favor, seleccione un año en el formulario derecho</strong></p>
+</div>
+{% endif %}
 
     
 
@@ -75,29 +107,49 @@
 {% endblock %}
 
 {% block filtros%}
+<!--
+
 </br>
-<form method="post" onsubmit="return validarFechas()">
+
+<form action="" method="POST">
     {% csrf_token %}
-    <label for="fechainicio">Fecha inicial</label><br>
-    <input class="form-control" type="date" id="fechainicio" name="fechainicio" {%if fecha_inicio %} value={{fecha_inicio}} {% endif %} required><br>
+    
 
-    <label for="fechafinal">Fecha final</label><br>
-    <input class="form-control" type="date" id="fechafinal" name="fechafinal" {%if fecha_final %} value={{fecha_final}} {% endif %} required><br>
-    <div class="text-center">
-        <input class="btn btn-dark" type="submit" value="Generar">
-    </div>
+
+<p class="mt-3">Empresas a comparar:</p>
+{% for empresa in empresasSector %}
+{% if empresa.id != miempresa.id %}
+<div class="form-check">
+    <input  type="checkbox" value="{{empresa.id}} " id="flexCheckDefault" name="empresasSeleccionadas">
+    <label class="form-check-label"  for="flexCheckDefault">
+      {{empresa.nombre_empresa}}
+    </label>
+  </div>
+{% endif %}
+{% endfor %}
+
+<button type="submit" class="btn btn-primary">Calcular</button>
 </form>
-</br>
-<script>
-    function validarFechas() {
-        var fechaInicio = new Date(document.getElementById('fechainicio').value);
-        var fechaFinal = new Date(document.getElementById('fechafinal').value);
-        if (fechaInicio >= fechaFinal) {
-            alert('La fecha inicial debe ser menor que la fecha final');
-            return false;  // Impide que el formulario se envíe
-        }
 
-        return true;  // Permite que el formulario se envíe si las fechas son válidas
-    }
-</script>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const checkboxes = document.querySelectorAll('input[name="opciones"]');
+      let checked = false;
+    
+      for (const checkbox of checkboxes) {
+        if (checkbox.checked) {
+          checked = true;
+          break;
+        }
+      }
+    
+      if (!checked) {
+        alert('Debes seleccionar al menos una opción.');
+        e.preventDefault(); // Evita el envío del formulario
+      }
+    });
+    </script>
+-->
+    
 {% endblock %}

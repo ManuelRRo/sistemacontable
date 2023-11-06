@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-{% if activoCorriente %}
+{% if error is None %}
 {% if anio %}
 <h4 class="text-center mt-4"></h4>
 
@@ -34,15 +34,14 @@
     <table class="table table-borderless table-hover">
         <thead>
             <th>Ratio</th>
-            {% for empresa in empresas %}
-            <th>{{empresa.nombre}}</th>
-            {% endfor %}
+            <th>{{miempresa}}</th>
+            <th>{{empresa2}}</th>
             <th>Promedio</th>
         </thead>
 
         <tbody>
             <tr>
-            {% for elemento in promedios %}
+            {% for elemento in listaAimprimir %}
             <td>{{elemento.nombre}}</td>
             {% if elemento.ratio1esMayor %}
             <td style="background-color: green;">{{ elemento.ratio1|floatformat:2 }}</td>
@@ -54,7 +53,7 @@
             {% else %}
             <td style="background-color: red;">{{ elemento.ratio2|floatformat:2 }}</td>
             {% endif %}
-            <td>{{ elemento.promedio|floatformat:2 }}</td>
+            <td>{{ elemento.valorDeComparacion|floatformat:2 }}</td>
             </tr>
             
             {% endfor %}
@@ -68,15 +67,11 @@
 {% endif %}
 
 {% else %}
+
 <div class="d-flex justify-content-center">
-    <div class="container">
-        <div class="col-12"></div>
-        <strong>No se han asignado las cuentas para el cálculo de ratios</strong>
-    </div>
-    <div class="container">
-        <div class="col-12"></div>
-        <a href="{% url 'conta:crear-cuentas-ratios'%}" class="btn btn-primary">Definir Cuentas para calcular los Ratios</a>
-    </div>
+    <div class="alert alert-danger" role="alert">
+        {{error}}
+      </div>
 </div>
 
 {% endif %}
@@ -84,7 +79,7 @@
 {% endblock %}
 
 {% block filtros%}
-{% if activoCorriente %}
+{% if error is None %}
 </br>
 
 <form action="" method="POST">
@@ -95,7 +90,54 @@
     <option value="{{año.anio}}">{{año.anio}}</option>
     {% endfor %}
 </select>
+
+
+<p class="mt-3">Empresa a comparar:</p>
+<select name="selectEmpresa" class="form-select" id="" required>
+    {% for empresa in empresasSector %}
+    {% if empresa.id != miempresa.id %}
+    <option value="{{empresa.id}}">{{empresa}}</option>
+    {% endif %}
+    {% endfor %}
+</select>
+
+<!--
+<p class="mt-3">Empresas a comparar:</p>
+{% for empresa in empresasSector %}
+{% if empresa.id != miempresa.id %}
+<div class="form-check">
+    <input  type="checkbox" value="{{empresa.id}} " id="flexCheckDefault" name="empresasSeleccionadas">
+    <label class="form-check-label"  for="flexCheckDefault">
+      {{empresa.nombre_empresa}}
+    </label>
+  </div>
+{% endif %}
+{% endfor %}
+-->
 <button type="submit" class="btn btn-primary">Calcular</button>
 </form>
+
+<!--
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const checkboxes = document.querySelectorAll('input[name="opciones"]');
+      let checked = false;
+    
+      for (const checkbox of checkboxes) {
+        if (checkbox.checked) {
+          checked = true;
+          break;
+        }
+      }
+    
+      if (!checked) {
+        alert('Debes seleccionar al menos una opción.');
+        e.preventDefault(); // Evita el envío del formulario
+      }
+    });
+    </script>
+-->
+    
+
 {% endif %}
 {% endblock %}
