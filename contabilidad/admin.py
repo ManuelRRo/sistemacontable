@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import Cuenta,Transaccion,Empresa,Catalogo,Propietario
+from .models import Cuenta,Transaccion,Empresa,Catalogo,Propietario,Ratio
 
 @admin.register(Cuenta)
 class CuentaAdmin(admin.ModelAdmin):
-    list_display = ['codigo','nombre','categoria']
+    list_display = ['codigo','nombre','categoria','cuenta_ratio','catalogo']
 
 @admin.register(Transaccion)
 class TransaccionAdmin(admin.ModelAdmin):
@@ -16,8 +16,12 @@ class CatalogoAdmin(admin.ModelAdmin):
 
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id','nombre_empresa','catalogo_empresa','propietario']
 
 @admin.register(Propietario)
 class EmpresaAdmin(admin.ModelAdmin):
     list_display = ['user']
+
+@admin.register(Ratio)
+class RatioAdmin(admin.ModelAdmin):
+    list_display = ['nombre_ratio','empresa','valor']

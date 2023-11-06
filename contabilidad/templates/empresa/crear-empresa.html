@@ -1,0 +1,29 @@
+
+{% extends "layouts/base.html" %}
+{% block title %}Balance General{% endblock %}
+
+{% block content %}
+{% if propietario %}
+    <h1>Registrar Empresa</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {{empresa_form.as_p}}
+    <h6>Cargar Excel de Estados Financieros</h6>
+    {{ form.as_p }}
+
+    {% csrf_token %}
+    <p><input class="btn btn-success" type="submit" value="Guardar"></p>
+</form>
+{% else %}
+<h1>No tiene propietario registrado</h1>
+{% endif%}
+<script>
+    var nombre_empresa = document.getElementById('id_nombre_empresa');
+    var sectores = document.getElementById('id_sectores');
+    var archivo = document.getElementById('id_archivo');
+    nombre_empresa.className += 'form-control';
+    sectores.className += 'form-select';
+    archivo.className += 'form-control';
+</script>
+{% endblock %}
+

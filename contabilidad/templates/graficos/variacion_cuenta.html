@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %}
+{% block title %}Gráfico de variación{% endblock %}
+
+{% block content %}
+
+    
+  <form method="post" action="{% url 'conta:variacion_cuenta' %}">
+    {% csrf_token %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-danger" role="alert">
+          {{message}}
+        </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row mt-4">
+      <div class="col-8">
+        <label for="cuenta_select">Seleccionar una cuenta de balance:</label>
+        <select class="form-select" aria-label="Default select example" name="cuenta" id="cuenta_select">
+            <option value="" selected>Elige una cuenta</option>
+            {% for cuenta in cuentas_balance %}
+              <option value="{{ cuenta.id }}">{{ cuenta.nombre }}</option>
+            {% endfor %}
+          </select>
+      </div>
+      <div class="col-3">
+        <label for="fname">Fecha inicial</label><br>
+        <input type="date" id="año" name="fechainicio" value="Año"><br>
+        <label for="fame">Fecha final</label><br>
+        <input type="date" id="año" name="fechafinal" value="Año"><br>
+      </div>
+      <div class="col-1">
+        <button type="submit">Seleccionar</button>
+      </div>
+    </div>
+  </form>
+  {% if mostrarGrafico %}
+  <div class="row mt-4">
+    {{ grafico_var | safe }}
+</div>
+  {% endif %}
+{% endblock %}
