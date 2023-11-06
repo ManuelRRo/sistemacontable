@@ -674,6 +674,7 @@ def calculoAVertical(request,year_1=None,year_2=None,year_3=None,op=1):
     return contexto
 
 #HU-06 Analisis Vertical
+@login_required
 def analisisVertical(request):
     context={}
     try:
@@ -768,6 +769,7 @@ def calculoAHorizontal(request,year_1=None,year_2=None,year_3=None,op=1):
 
 
 #HU-07 Analisis Horizontal
+@login_required
 def analisisHorizontal(request):
     context={}
     try:
