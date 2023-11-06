@@ -29,7 +29,7 @@
     </table>
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Guardar</button>
-    <a href="{%url 'conta:transaccion-lista'%}" class="btn btn-danger">Cancelar</a>
+    <a href="{%url 'conta:ver_balance_general'%}" class="btn btn-danger">Cancelar</a>
 </form>
 
 {% else %}

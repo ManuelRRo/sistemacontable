@@ -153,7 +153,7 @@ def CrearEmpresa(request):
                 for ratio in Ratio.NombreRatio.choices:
                     print(ratio)
 
-                lista_anios = [hoja_bgn.columns[2], hoja_bgn.columns[3], hoja_bgn.columns[4]]
+                lista_anios = hoja_bgn.columns[3:]
                 
                 for index, row in hoja_bgn.iterrows():
                     #Extraer primer caracter de la columna codigo
@@ -172,7 +172,10 @@ def CrearEmpresa(request):
                         codigo = row["codigo"],
                         nombre = row["cuenta"],
                         categoria = tipo,
+                        categoria_av = tipo,
+                        cuenta_av = row["cuenta_total"],
                         catalogo = catalogo_excel
+                        
                     )
                     try:
                         for anio in lista_anios:
@@ -192,7 +195,7 @@ def CrearEmpresa(request):
                 hoja_ers = pandas.read_excel(path, sheet_name="ERS")
 
                 # Obtener años
-                lista_anios = [hoja_ers.columns[2], hoja_ers.columns[3], hoja_ers.columns[4]]
+                lista_anios = hoja_ers.columns[3:]
 
                 # Variables a utilizar
                 codigo_ers = ''
@@ -230,6 +233,8 @@ def CrearEmpresa(request):
                         nombre = row["cuenta"],
                         categoria = categoria_ers,
                         subcategoria = subcategoria_ers,
+                        categoria_av = Cuenta.CategoriaAV.ESTADO_RESULTADOS,
+                        cuenta_av = row["cuenta_total"],
                         catalogo = catalogo_excel
                     )
 
@@ -469,10 +474,11 @@ def cargarBalanceGeneral(request):
     if request.method == "POST":
         try:
             #la fecha debe ser de tipo datetime.date(anio,mes,dia)
-            year_1 = datetime.strptime(request.POST['fechainicio'], "%Y-%m-%d").date()# retorna como anio-mes-dia
-            year_2 = datetime.strptime(request.POST['fechafinal'], "%Y-%m-%d").date()# retorna como anio-mes-dia
+            year_1 = datetime.strptime(request.POST['fechainicio'], "%Y-%m-%d")# retorna como anio-mes-dia
+            year_2 = datetime.strptime(request.POST['fechafinal'], "%Y-%m-%d")# retorna como anio-mes-dia
+            rango_de_anios = [str(anio) for anio in range(year_1.year, year_2.year + 1)]
 
-            contexto = sumarTransacciones(request,year_1,year_2)
+            contexto = sumarTransacciones(request,rango_de_anios,year_1,year_2)
 
             print("contexto_)sumas",contexto)
         except Exception as e:
@@ -486,7 +492,7 @@ def cargarBalanceGeneral(request):
             year_2 = timezone.now().strftime('%Y-%m-%d')
 
         
-            contexto = sumarTransacciones(request,op=0)
+            contexto = sumarTransacciones(request,rango_de_anios,op=0)
         except Exception as e:
             error_message = f"Se produjo una excepción: {str(e)}"
             print(error_message)
@@ -502,7 +508,7 @@ def cargarBalanceGeneral(request):
 #             lista.append((cuenta.transacciones.all().filter(fecha_creacion__year=2022).first().monto/total_cuenta)*100)   
 #         return lista
 
-def sumarTransacciones(request,year_1=None,year_2=None,year_3=None,op=1):
+def sumarTransacciones(request,rango_anios,year_1=None,year_2=None,year_3=None,op=1):
     cuentasActivos = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
     diccionario_cuentas = {}
     contexto = {}
@@ -519,8 +525,8 @@ def sumarTransacciones(request,year_1=None,year_2=None,year_3=None,op=1):
     a = 0
     
     if op == 1:
-        anio_1 = year_1
-        anio_2 = year_2
+        anio_1 = year_1.date()
+        anio_2 = year_2.date()
         anio_3 = year_3
     else:
         #date(anio,mes,dia)
@@ -591,7 +597,7 @@ def sumarTransacciones(request,year_1=None,year_2=None,year_3=None,op=1):
         'saldo_credito': saldoCredito["total"],
         'saldo_debito': saldoDebito["total"],
         'total': total,
-        'num_cuenta': 0,#id_transaccion.pk,
+        'num_cuenta': cnt.first().pk,
         'av': round(a,2),
         }
          
@@ -600,6 +606,7 @@ def sumarTransacciones(request,year_1=None,year_2=None,year_3=None,op=1):
         'diccionario_cuentas':diccionario_cuentas,
         'pathbase':settings.BASE_DIR,
         'anio' : anio_3,
+        'rango_anios': rango_anios
         }
         
     return contexto
@@ -624,7 +631,7 @@ class TransaccionUpdateView(UpdateView):
     model = Transaccion
     form_class = UpdateTransaccionForm
     template_name = 'balance/transaccion_update.html'
-    success_url = reverse_lazy('conta:transaccion-lista')
+    success_url = reverse_lazy('conta:ver_balance_general')
 
     def get_object(self, queryset=None):
         # Obtener el objeto que se va a actualizar
@@ -676,18 +683,19 @@ class VerEstadoResultado(View):
         rango_de_anios = [str(anio) for anio in range(fecha_inicio_obj.year, fecha_final_obj.year + 1)]
         # Generando diccionario para template estado_resultados.html
         transaccion_cuenta = self.get_context_data()["transaccion_cuenta"].filter(fecha_creacion__range=(fecha_inicio,fecha_final))
-        
+        print("transaccion cuenta",transaccion_cuenta)
        # Crear un diccionario para almacenar transacciones por año
         transacciones_por_anio = {}
 
         for anio in rango_de_anios:
             transacciones_por_anio[anio] = []
+        print("transaccion_por_anio",transacciones_por_anio)
 
         for transaccion in transaccion_cuenta:
             anio_transaccion = str(transaccion.fecha_creacion.year)
             if anio_transaccion in transacciones_por_anio:
                 transacciones_por_anio[anio_transaccion].append(transaccion)
-
+        print("transaccion_por_anio 2",transacciones_por_anio)
         context["transacciones_por_anio"] = transacciones_por_anio
         context["empresa"] = self.get_context_data()["empresa"]
         context["fecha_inicio"] = fecha_inicio
@@ -697,6 +705,66 @@ class VerEstadoResultado(View):
         
 
         return render(request, self.template_name, context) 
+    
+class VerBalanceGeneral(View):
+    model_transaccion = Transaccion
+    model_empresa = Empresa
+    template_name = 'balance/listar-balance2.html'
+
+    def get_queryset(self):
+        context = {}
+        empresa = self.model_empresa.objects.get(propietario__user=self.request.user)
+        # Crear tres objetos Q, uno para cada categoría
+        q1 = Q(cuenta__categoria=Cuenta.Categoria.ACTIVO)
+        q2 = Q(cuenta__categoria=Cuenta.Categoria.PASIVO)
+        q3 = Q(cuenta__categoria=Cuenta.Categoria.PATRIMONIO)
+        q4 = Q(cuenta__catalogo=empresa.catalogo_empresa)
+        # Combinar los objetos Q con el operador 'OR' usando '|'
+        context["transaccion_cuenta"] = self.model_transaccion.objects.filter((q1 | q2 | q3) & q4)
+        context["empresa"] = empresa
+        return context
+    
+    def get_context_data(self, **kwargs):
+        context = {}
+        context.update(self.get_queryset()) 
+        return context
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+    
+    def post(self, request, *args, **kwargs):
+        context = {}
+        fecha_inicio = request.POST['fechainicio']
+        fecha_final = request.POST['fechafinal']
+        # Convierte las fechas a objetos de tipo datetime
+        fecha_inicio_obj = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+        fecha_final_obj = datetime.strptime(fecha_final, '%Y-%m-%d')
+        # Obtiene el rango de años entre las fechas de inicio y final
+        rango_de_anios = [str(anio) for anio in range(fecha_inicio_obj.year, fecha_final_obj.year + 1)]
+        # Generando diccionario para template estado_resultados.html
+        transaccion_cuenta = self.get_context_data()["transaccion_cuenta"].filter(fecha_creacion__range=(fecha_inicio,fecha_final))
+        print("transaccion cuenta",transaccion_cuenta)
+       # Crear un diccionario para almacenar transacciones por año
+        transacciones_por_anio = {}
+
+        for anio in rango_de_anios:
+            transacciones_por_anio[anio] = []
+        print("transaccion_por_anio",transacciones_por_anio)
+
+        for transaccion in transaccion_cuenta:
+            anio_transaccion = str(transaccion.fecha_creacion.year)
+            if anio_transaccion in transacciones_por_anio:
+                transacciones_por_anio[anio_transaccion].append(transaccion)
+        print("transaccion_por_anio 2",transacciones_por_anio)
+        context["transacciones_por_anio"] = transacciones_por_anio
+        context["empresa"] = self.get_context_data()["empresa"]
+        context["fecha_inicio"] = fecha_inicio
+        context["fecha_final"] = fecha_final
+        context["rango_de_anios"] = rango_de_anios
+        context["cuentas"] = transacciones_por_anio[rango_de_anios[0]]
+        
+
+        return render(request, self.template_name, context)
 
 def funcionRatios(anio,request,emprsa):
     # Obtener el propietario de la empresa
