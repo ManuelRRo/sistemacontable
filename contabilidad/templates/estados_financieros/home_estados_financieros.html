@@ -1,0 +1,37 @@
+{% extends "layouts/base.html" %}
+{% block title %}Estados Financieros | AnalytiFin{% endblock %}
+
+{% block content %}
+    {% if propietario.empresactiva %}
+    <div class="header">
+        <div class="left">
+            <h1>{{empresa.nombre_empresa}}</h1>
+            <ul class="breadcrumb">
+                <li><a href="#">
+                        AnalytiFin
+                    </a></li>
+                /
+                <li><a href="#" class="active">Inicio</a></li>
+                /
+                <li><a href="#" class="active">Estados Financieros</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6 mb-3">
+            <div class="card rounded-4 card-content">
+                <div class="card-body">
+                    <h5 class="card-title">Estados Financieros</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">Documentos</h6>
+                    <p class="card-text">
+                        Visualización de estados financieros de {{empresa.nombre_empresa}}: Balance General y Estado de Resultados.
+                    </p>
+                    <a href="{% url 'conta:ver_balance_general' %}" class="card-link">Balance General</a>
+                    <a href="{% url 'conta:ver_estado_resultado' %}" class="card-link">Estado de Resultados</a>
+                    <a href="{% url 'conta:variacion_cuenta' %}" class="card-link">Visión Gráfica</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif%}
+{% endblock %}
