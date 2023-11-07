@@ -1066,9 +1066,14 @@ def comparacionRatiosEmpresasPromedio(request):
                 ratios=funcionRatios(anio,request,empresa)
                 elemento={"empresa.id":empresa.id,"ratios":ratios}
                 ratiosEmpresas.append(ratios)
-            """   
-            ratios1=funcionRatios(anio,request,emprsa)
-            ratios2=funcionRatios(anio,request,empresa2)
+            """
+            try:   
+                ratios1=funcionRatios(anio,request,emprsa)
+                ratios2=funcionRatios(anio,request,empresa2)
+            except:
+                error="Error, asegurese de que todas las cuentas tengan montos en los años requeridos. Mientras tanto, elija otro año u otra empresa"
+                contexto={'listaAimprimir':listaAimprimir,'miempresa':emprsa,"empresa2":empresa2,"listaAños":anios,"anio":anio,"empresasSector":empresasSector,"error":error}
+                return render(request,"ratios/comparacion-empresas-ratios-promedio.html",contexto)
                     
             listaAimprimir=[
                 {"nombre":"Razón circulante"},
@@ -1151,9 +1156,14 @@ def comparacionRatiosEmpresasValor(request):
                 ratios=funcionRatios(anio,request,empresa)
                 elemento={"empresa.id":empresa.id,"ratios":ratios}
                 ratiosEmpresas.append(ratios)
-            """   
-            ratios1=funcionRatios(anio,request,emprsa)
-            ratios2=funcionRatios(anio,request,empresa2)
+            """
+            try:   
+                ratios1=funcionRatios(anio,request,emprsa)
+                ratios2=funcionRatios(anio,request,empresa2)
+            except:
+                error="Error, asegurese de que todas las cuentas tengan montos en los años requeridos. Mientras tanto, elija otro año u otra empresa"
+                contexto={'listaAimprimir':listaAimprimir,'miempresa':emprsa,"empresa2":empresa2,"listaAños":anios,"anio":anio,"empresasSector":empresasSector,"error":error}
+                return render(request,"ratios/comparacionPorValorSalida.html",contexto)
                     
             razonCirculante=request.POST.get("razonCirculante")
             pruebaAcida=request.POST.get("pruebaAcida")
@@ -1332,3 +1342,59 @@ def calcula_ratiosFin(anio, empresa):
         {"nombre":"Período medio de pago","valor":periodoMedioPago}
     ]
     return ratios
+
+def calcular_ratios2(request):
+    try:
+        propietarioemprsa = get_object_or_404(Propietario,user=request.user)
+
+    except:
+        print("No hay propietario")
+
+    try:
+        emprsa = get_object_or_404(Empresa,propietario=propietarioemprsa)
+        
+    except:
+        print("No tiene empresa registrada")
+    anios=[]
+    anio1=None
+    anio2=None
+    error=None
+    listaAimprimir=[]
+    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa).order_by("fecha_creacion")
+    if activoCorriente:
+        for activo in activoCorriente:
+            anioNuevo={"anio":activo.fecha_creacion.year} 
+            anios.append(anioNuevo)
+    else:
+        error="Error, la empresa "+str(emprsa)+" no tiene asignadas cuentas para el cálculo de ratios"
+    if request.method=="POST":
+        anio2=int(request.POST.get("selectAño1"))
+        anio1=anio2-1
+        listaAimprimir=[
+                {"nombre":"Razón circulante"},
+                {"nombre":"Prueba ácida"},
+                {"nombre":"Razón de capital de trabajo"},
+                {"nombre":"Razón de efectivo"},
+                {"nombre":"Razón de rotación de inventario"},
+                {"nombre":"Razón de días de inventario"},
+                {"nombre":"Razón de rotación de cuentas por cobrar"},
+                {"nombre":"Razón de período medio de cobranza"},
+                {"nombre":"Razón de rotación de cuentas por pagar"},
+                {"nombre":"Período medio de pago"}
+            ]
+        try:
+            ratios1=funcionRatios(anio1,request,None)
+            ratios2=funcionRatios(anio2,request,None)
+        except:
+            error="Error, asegurese de que todas las cuentas tengan montos en los años requeridos. Mientras tanto, elija otro año u otra empresa"
+            contexto={'empresa':emprsa,"listaAños":anios,"anio1":anio1,"anio2":anio2,"listaAimprimir":listaAimprimir,"error":error}
+            return render(request,"ratios/calcular-ratios copy.html",contexto)
+        for elemento,ratio1, ratio2 in zip(listaAimprimir,ratios1, ratios2):
+                elemento['ratio1']=ratio1['valor']
+                elemento['ratio2']= ratio2['valor']
+                if ratio1['valor']>=ratio2['valor']:
+                    elemento['ratio1esMayor']=True
+                else:
+                    elemento['ratio1esMayor']=False
+    contexto={'empresa':emprsa,"listaAños":anios,"anio1":anio1,"anio2":anio2,"listaAimprimir":listaAimprimir,"error":error}
+    return render(request,"ratios/calcular-ratios copy.html",contexto)

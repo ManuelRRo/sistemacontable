@@ -15,7 +15,7 @@ urlpatterns = [
     path('cargaEmpresa/',views.CrearEmpresa,name="cargar-balance"),
     path('estado_resultados/', login_required(views.VerEstadoResultado.as_view()), name="ver_estado_resultado"),
     path('graficoVaricacion/', views.grafico_var, name='variacion_cuenta'),
-    path('calcular_ratios/',views.calcular_ratios,name="calcular_ratios"),
+    path('ratios_analisis_horizontal/',views.calcular_ratios2,name="calcular_ratios"),
     #HU-05-Definir Cuentas Ratios
     path('homeRatios/',views.homeRatios,name="home-ratios"),
     path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
