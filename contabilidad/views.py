@@ -26,6 +26,7 @@ from plotly.io import to_image
 from io import BytesIO
 import base64
 import json
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.db.models import Min, Max
 
 #
@@ -307,6 +308,98 @@ def ActualizarCuentasRatios(request):
     context["error_message"] = None
     #Crear Cuentas de Ratios
     return render(request,'ratios/HU-005-cuenta-ratios.html',context)
+# Nueva definir cuentas ratios
+#debe ser mismo orden y nombre del urlpatterns definidos en las urls.py
+
+@xframe_options_sameorigin
+def updatecuentasRatios(request,id_cuenta_ratio,codigo_ratio):
+    context = {}
+    cuentas_catalogo = request.user.propietario.empresa.catalogo_empresa.cuentas.all()
+    cuenta = None
+    if request.method == 'POST':
+        print("request.POST",request.POST['cuenta_select'])
+        #obtener id del select
+        if 'cuenta_select' in request.POST:
+            id_nuevo_ratio = request.POST['cuenta_select']
+        #obtener objeto cuenta del selesct
+        obj = Cuenta.objects.get(pk=id_nuevo_ratio)
+
+        # si no tiene cuenta_ratio asignada
+        cuenta_antigua = cuentas_catalogo.filter(cuenta_ratio=codigo_ratio).first()
+        print("cuenta antigua",cuenta_antigua)
+        if cuenta_antigua == None:
+            pass
+        else:
+            cuenta_antigua.cuenta_ratio = Cuenta.CuentaRatio.NINGUNA
+            cuenta_antigua.save()
+            
+        #asignamos
+        obj.cuenta_ratio = codigo_ratio
+        #guardar
+        obj.save()
+        # si tiene cuenta_ratio asignada
+        return redirect("conta:crear-cuentas-ratios")
+
+    else:
+        if id_cuenta_ratio != 0:
+            cuenta = Cuenta.objects.get(pk=id_cuenta_ratio)
+        
+    context["cuenta_definida"] = cuenta
+    context["cuentas_catalogo"] = cuentas_catalogo
+
+    
+    print(request)
+    return render(request,'ratios/updatecuentaratio.html',context)
+        
+        
+    
+#Seleeccionar cuentas ratios
+def selectCuentasRatios(request):
+    
+    usuario = request.user
+    try:
+        propietarioemprsa = get_object_or_404(Propietario, user=usuario)
+    except:
+        messages.error(request, "No hay propietario registrado")
+        return render(request, 'graficos/ratios.html', {'ratios': ratios})
+    try:
+        emprsa = get_object_or_404(Empresa, propietario=propietarioemprsa)
+    except:
+        messages.error(request, "No hay empresa registrada")
+        return render(request, 'graficos/ratios.html', {'ratios': ratios})
+    
+    #obtener codigos de ratios menos el NNG
+    codigos_ratios = Cuenta.CuentaRatio.values[1:]
+    nombres_ratios = Cuenta.CuentaRatio.labels[1:]
+    #seleccionar todas las cuentas de ratios
+    cuentasCatalogo = usuario.propietario.empresa.catalogo_empresa.cuentas.filter(cuenta_ratio__in=codigos_ratios)
+    dict_ratios = {}
+    try:
+        for nombre,codigo in zip(nombres_ratios,codigos_ratios):
+            cuenta_de_ratio = cuentasCatalogo.filter(cuenta_ratio=codigo)
+            if len(cuenta_de_ratio) == 0:
+                dict_ratios[nombre]={
+                "nombre_ratio":nombre,
+                "codigo_ratio":codigo,
+                "cuenta":cuenta_de_ratio.first(),
+                "noasignado":True
+                }
+            else:
+                dict_ratios[nombre]={
+                "nombre_ratio":nombre,
+                "codigo_ratio":codigo,
+                "cuenta":cuenta_de_ratio.first(),
+                "noasignado":False
+                }
+    except Exception as e:
+        pass
+    print(cuentasCatalogo)
+    context = {
+        "dict_ratios":dict_ratios,
+    }
+
+    return render(request,'ratios/select-ratios.html',context)
+
 #HU-19-Grafico de variacion
 
 def grafico_var(request):

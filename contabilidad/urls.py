@@ -18,7 +18,9 @@ urlpatterns = [
     path('calcular_ratios/',views.calcular_ratios,name="calcular_ratios"),
     #HU-05-Definir Cuentas Ratios
     path('homeRatios/',views.homeRatios,name="home-ratios"),
-    path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
+    #path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
+    path('selectRatios/',views.selectCuentasRatios,name="crear-cuentas-ratios"),
+    path('actualizarcuentasRatios/<int:id_cuenta_ratio>/<str:codigo_ratio>/',views.updatecuentasRatios,name="actualizar-ratios"),
     path('comparacion_ratios_empresas_promedio/',views.comparacionRatiosEmpresasPromedio,name="comparacion-ratios-empresas-promedios"),
     path('grafico_ratios/',views.graficoRatios,name="grafico_ratios"),
     # Benchmark

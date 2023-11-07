@@ -79,3 +79,7 @@ class UpdateTransaccionForm(forms.ModelForm):
             'cuenta': forms.Select(attrs={'class': 'form-control d-none'}),
             'monto': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+class UpdateCuentaForm(forms.Form):
+        nombre_empresa = forms.CharField(max_length=100)
+        sectores = forms.ChoiceField(choices=Empresa.Sector.choices)

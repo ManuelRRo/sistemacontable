@@ -1,0 +1,55 @@
+
+{% extends "layouts/base.html" %}
+{% block title %}Seleccionar Cuentas{% endblock %}
+
+{% block content %}
+{% if error_message %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>{{error_message}}</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
++{% endif %}
+<h3>Definir Cuentas para calcular los Ratios</h3>
+<form action="" method="post">
+    <table class="table table-bordered">
+        <thead>
+            <th>Cuenta Ratio</th>
+            <th>Cuenta</th>
+            <th>Opcion</th>
+        </thead>
+    
+        <tbody>
+            {% for key,value in dict_ratios.items %}
+            <tr>
+                <td >{{value.nombre_ratio}}</td>
+                {%if value.noasignado %}
+                    <td>Cuenta de Ratio no asignada</td>
+                    <td><a href="{% url 'conta:actualizar-ratios' id_cuenta_ratio=0 codigo_ratio=value.codigo_ratio%}" 
+                        class="btn btn-primary">Actualizar</a>
+                    </td>
+                {%else%}
+                    <td>{{value.cuenta.nombre}}</td>
+                    <td><a href="{% url 'conta:actualizar-ratios' id_cuenta_ratio=value.cuenta.pk codigo_ratio=value.codigo_ratio%}" 
+                        class="btn btn-primary">Actualizar</a>
+                    </td>
+                {%endif%}
+                
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Enviar</button>
+    {%csrf_token%}
+</form>
+<br>
+<br>
+{% endblock %}
+{% block filtros%}
+<script>
+    $(document).ready(function() {
+        $('.btn btn-primary').select2();
+    });
+</script>
+{% endblock %}
+
