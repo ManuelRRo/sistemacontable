@@ -987,6 +987,7 @@ def funcionRatios(anio,request,emprsa):
     ]
     return ratios
 
+@login_required
 def calcular_ratios(request):
     try:
         propietarioemprsa = get_object_or_404(Propietario,user=request.user)
@@ -999,36 +1000,29 @@ def calcular_ratios(request):
         
     except:
         print("No tiene empresa registrada")
-    activosCorrientes=None
     anios=[]
-    if request.method=="POST":
-        anio=int(request.POST.get("selectAño"))
-    else:
-        anio=2020
-    activosCorrientes=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa).order_by("fecha_creacion")
-    if activosCorrientes:
-        for activo in activosCorrientes:
+    ratios=[]
+    anio=None
+    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa).order_by("fecha_creacion")
+    if activoCorriente:
+        for activo in activoCorriente:
             anioNuevo={"anio":activo.fecha_creacion.year} 
             anios.append(anioNuevo)
-    activoCorriente=Transaccion.objects.filter(cuenta__cuenta_ratio="ACTC",cuenta__catalogo=emprsa.catalogo_empresa, fecha_creacion__year=anio).first()
-    
-    if activoCorriente is None:
-        ratios=[]
-    else:
-        ratios=funcionRatios(anio,request,None)
-
-            
-    #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
-    """
-    if request.method == "POST":
-        year_1 = request.POST['fechainicio']# retorna como anio-mes-dia
-        year_2 = request.POST['fechafinal']# retorna como anio-mes-dia
-    else:
-        year_1 = timezone.now().strftime('%Y-%m-%d')
-        year_2 = timezone.now().strftime('%Y-%m-%d')  
-    """
+    if request.method=="POST":
+        anio=int(request.POST.get("selectAño"))
+        ratios=funcionRatios(anio,request,None)    
+        #Sumar montos #Debo crear un diccionario con la cuenta y monto que tiene
+        """
+        if request.method == "POST":
+            year_1 = request.POST['fechainicio']# retorna como anio-mes-dia
+            year_2 = request.POST['fechafinal']# retorna como anio-mes-dia
+        else:
+            year_1 = timezone.now().strftime('%Y-%m-%d')
+            year_2 = timezone.now().strftime('%Y-%m-%d')  
+        """
     return render(request,"ratios/calcular-ratios.html",{'ratios':ratios,'empresa':emprsa,"listaAños":anios,"anio":anio})
 
+@login_required
 def comparacionRatiosEmpresasPromedio(request):
     try:
         propietarioemprsa = get_object_or_404(Propietario,user=request.user)
@@ -1112,6 +1106,7 @@ def comparacionRatiosEmpresasPromedio(request):
     contexto={'listaAimprimir':listaAimprimir,'miempresa':emprsa,"empresa2":empresa2,"listaAños":anios,"anio":anio,"empresasSector":empresasSector,"error":error}
     return render(request,"ratios/comparacion-empresas-ratios-promedio.html",contexto)
 
+@login_required
 def comparacionRatiosEmpresasValor(request):
     try:
         propietarioemprsa = get_object_or_404(Propietario,user=request.user)

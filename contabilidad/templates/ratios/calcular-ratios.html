@@ -5,26 +5,28 @@
 {% endblock %}
 
 {% block content %}  
-{% if ratios %}
+{% if listaAños %}
 <form action="" method="POST">
     {% csrf_token %}
-    <p>Año:</p>
+    <p>Seleccione un año:</p>
 <select name="selectAño" id="" required class="form-select"> 
     {% for año in listaAños %}
     <option value="{{año.anio}}">{{año.anio}}</option>
     {% endfor %}
 </select>
-<button type="submit" class="btn btn-primary">Calcular</button>
+<button type="submit" class="btn btn-primary mt-2">Ver ratios</button>
 </form>
-<div class="d-flex justify-content-center mt-3">
-    {{anio}}
-</div>
+
 
 {% endif %}
+    {% if listaAños %}
     {% if ratios %}
     <h4 class="text-center mt-4">{{empresa}}</h4>
     <div class="text-center fw-400 mb-3">
         Ratios
+    </div>
+    <div class="d-flex justify-content-center mt-3">
+        <p>Año: {{anio}}</p>
     </div>
     <div class="table-responsive">
         
@@ -44,6 +46,7 @@
         </table>
     
     </div>
+    {% endif  %}
     {% else %}
     <div class="d-flex justify-content-center">
         <div class="container">
