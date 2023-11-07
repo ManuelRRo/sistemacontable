@@ -1,16 +1,17 @@
 
 {% extends "layouts/base.html" %}
-{% block title %} Analisis Vertical {% endblock %}
+{% block title %} Analisis Horizontal {% endblock %}
 
 {% block content %}
 {% if user.propietario.empresactiva %}
-   <h1>Análisis Vertical</h1>
+   <h1>Análisis Horizontal</h1>
 
    <table class="table table-bordered table-hover">
        <thead>
            <th>Cuenta</th>
            <th>Valor {{anio}}</th>
-           <th>Análisis Vertical</th>
+           <th>Variación Absoluta</th>
+           <th>Varaiación Relativa</th>
        </thead>
        <tbody>
            
@@ -18,11 +19,9 @@
            <tr>
                <td>{{ cuenta }}</td>
                <td>{{ valores.total }}</td>
-                {% if valores.av == 100 %}
-                    <td style="color: red;">{{ valores.av }} %</td>
-                {% else %}
-                    <td>{{ valores.av }} %</td>
-                {% endif %}
+                <td>{{ valores.ahVA }}</td>
+                <td>{{ valores.ahVR }} % </td>
+
            </tr>
            {% endfor %}
            
@@ -37,7 +36,6 @@
 {% endif %}
 
 {% endblock %}
-
 
 {% block filtros%}
 </br>

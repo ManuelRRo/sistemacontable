@@ -1,0 +1,43 @@
+
+{% extends "layouts/base.html" %}
+{% block title %}Seleccionar Cuentas{% endblock %}
+
+{% block content %}
+{% if error_message %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>{{error_message}}</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+<form action="" method="post">
+    {%csrf_token%}
+    <table class="table table-bordered">
+        <thead>
+            <th>Cuenta Actual</th>
+            <th>Nueva cuenta</th>
+            <th>Accion</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{%if cuenta_definida %} {{cuenta_definida}}{%else%} No Definida {% endif %}</td>
+                <td>
+                    <select name="cuenta_select">
+                        {%for cuenta in cuentas_catalogo%}
+                        <option value="{{cuenta.pk}}">{{cuenta.nombre}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <button type="submit" class="btn btn-success">
+                        Guardar
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+</form>
+
+
+{% endblock %}
+

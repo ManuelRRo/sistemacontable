@@ -4,23 +4,44 @@
     Comparacion de ratios por promedio | AnalytiFin
 {% endblock %}
 
-{% block content %} 
-    <h4 class="text-center mt-4">{{miempresa}}</h4>
+{% block content %}
+{% if error is None %}
+{% if anio %}
+<h4 class="text-center mt-4"></h4>
+
     <div class="text-center fw-400 mb-3">
         Comparacion de ratios por promedio
     </div>   
+    
+    <div class="text-center fw-400 mb-3">
+        Año: {{anio}}
+    </div> 
+<div class="d-flex justify-content-center">
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover">
+            <tr>
+                <td style="background-color: green;"></td><td>Arriba del promedio</td>
+            </tr>
+            <tr>
+                <td style="background-color: red;"></td><td>Abajo del promedio</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
 <div class="table-responsive">
     <table class="table table-borderless table-hover">
         <thead>
             <th>Ratio</th>
-            {% for empresa in empresas %}
-            <th>{{empresa.nombre}}</th>
-            {% endfor %}
-            <th>promedio</th>
+            <th>{{miempresa}}</th>
+            <th>{{empresa2}}</th>
+            <th>Promedio</th>
         </thead>
+
         <tbody>
             <tr>
-            {% for elemento in promedios %}
+            {% for elemento in listaAimprimir %}
             <td>{{elemento.nombre}}</td>
             {% if elemento.ratio1esMayor %}
             <td style="background-color: green;">{{ elemento.ratio1|floatformat:2 }}</td>
@@ -32,44 +53,91 @@
             {% else %}
             <td style="background-color: red;">{{ elemento.ratio2|floatformat:2 }}</td>
             {% endif %}
-            <td>{{ elemento.promedio|floatformat:2 }}</td>
+            <td>{{ elemento.valorDeComparacion|floatformat:2 }}</td>
             </tr>
             
             {% endfor %}
         </tbody>
     </table>
 </div>
-    
+{% else %}  
+<div class="d-flex justify-content-center">
+    <p><strong>Por favor, seleccione un año en el formulario derecho</strong></p>
+</div>
+{% endif %}
 
-    
+{% else %}
 
-    
+<div class="d-flex justify-content-center">
+    <div class="alert alert-danger" role="alert">
+        {{error}}
+      </div>
+</div>
+
+{% endif %}
+
 {% endblock %}
 
 {% block filtros%}
+{% if error is None %}
 </br>
-<form method="post" onsubmit="return validarFechas()">
+
+<form action="" method="POST">
     {% csrf_token %}
-    <label for="fechainicio">Fecha inicial</label><br>
-    <input class="form-control" type="date" id="fechainicio" name="fechainicio" {%if fecha_inicio %} value={{fecha_inicio}} {% endif %} required><br>
+    <p>Año:</p>
+<select name="selectAño" id="" required class="form-select"> 
+    {% for año in listaAños %}
+    <option value="{{año.anio}}">{{año.anio}}</option>
+    {% endfor %}
+</select>
 
-    <label for="fechafinal">Fecha final</label><br>
-    <input class="form-control" type="date" id="fechafinal" name="fechafinal" {%if fecha_final %} value={{fecha_final}} {% endif %} required><br>
-    <div class="text-center">
-        <input class="btn btn-dark" type="submit" value="Generar">
-    </div>
+
+<p class="mt-3">Empresa a comparar:</p>
+<select name="selectEmpresa" class="form-select" id="" required>
+    {% for empresa in empresasSector %}
+    {% if empresa.id != miempresa.id %}
+    <option value="{{empresa.id}}">{{empresa}}</option>
+    {% endif %}
+    {% endfor %}
+</select>
+
+<!--
+<p class="mt-3">Empresas a comparar:</p>
+{% for empresa in empresasSector %}
+{% if empresa.id != miempresa.id %}
+<div class="form-check">
+    <input  type="checkbox" value="{{empresa.id}} " id="flexCheckDefault" name="empresasSeleccionadas">
+    <label class="form-check-label"  for="flexCheckDefault">
+      {{empresa.nombre_empresa}}
+    </label>
+  </div>
+{% endif %}
+{% endfor %}
+-->
+<button type="submit" class="btn btn-primary">Calcular</button>
 </form>
-</br>
-<script>
-    function validarFechas() {
-        var fechaInicio = new Date(document.getElementById('fechainicio').value);
-        var fechaFinal = new Date(document.getElementById('fechafinal').value);
-        if (fechaInicio >= fechaFinal) {
-            alert('La fecha inicial debe ser menor que la fecha final');
-            return false;  // Impide que el formulario se envíe
-        }
 
-        return true;  // Permite que el formulario se envíe si las fechas son válidas
-    }
-</script>
+<!--
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const checkboxes = document.querySelectorAll('input[name="opciones"]');
+      let checked = false;
+    
+      for (const checkbox of checkboxes) {
+        if (checkbox.checked) {
+          checked = true;
+          break;
+        }
+      }
+    
+      if (!checked) {
+        alert('Debes seleccionar al menos una opción.');
+        e.preventDefault(); // Evita el envío del formulario
+      }
+    });
+    </script>
+-->
+    
+
+{% endif %}
 {% endblock %}

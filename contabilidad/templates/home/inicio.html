@@ -48,8 +48,8 @@
                   <h5 class="card-title">Análisis de la Empresa</h5>
                   <h6 class="card-subtitle mb-2 text-body-secondary">Cuentas</h6>
                   <p class="card-text">Análisis de los estados financieros de {{empresa.nombre_empresa}}: Análisis Vertical y Análisis Horizontal.</p>
-                  <a href="#" class="card-link">Análisis Vertical</a>
-                  <a href="#" class="card-link">Análisis Horizontal</a>
+                  <a href="{% url 'conta:analisis_vertical' %}" class="card-link">Análisis Vertical</a>
+                  <a href="{% url 'conta:analisis_horizontal' %}" class="card-link">Análisis Horizontal</a>
                 </div>
             </div>
         </div>
