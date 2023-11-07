@@ -639,16 +639,16 @@ def calculoAVertical(request,year_1=None,year_2=None,year_3=None,op=1):
         cnt = cuenta.transacciones.filter(Q(naturaleza=Transaccion.Naturaleza.DEBITO) | Q(naturaleza=Transaccion.Naturaleza.CREDITO),fecha_creacion__range=(anio_1,anio_2))
         # print("Cuenta: ",cuenta, "Monto: ", saldoDebito/)
         if cuenta.categoria_av == Cuenta.CategoriaAV.ACTIVO:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_activos)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_activos)*100)
             a = (cnt.first().monto/total_activos)*100
         if cuenta.categoria_av == Cuenta.CategoriaAV.PASIVO:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_pasivos)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_pasivos)*100)
             a = (cnt.first().monto/total_pasivos)*100
         if cuenta.categoria_av == Cuenta.CategoriaAV.PATRIMONIO:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
             a = (cnt.first().monto/total_capital)*100
         if cuenta.categoria_av == Cuenta.CategoriaAV.ESTADO_RESULTADOS:
-            print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
+            #print("Cuenta: ",cuenta.nombre,cnt.first().monto,"Vertical",(cnt.first().monto/total_capital)*100)
             a = (cnt.first().monto/total_ventas)*100
 
 
