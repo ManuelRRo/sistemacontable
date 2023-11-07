@@ -9,13 +9,14 @@ app_name = 'conta'
 
 urlpatterns = [
     path('',views.home,name="home"),
+    path('estados_financieros/',views.estados_financieros,name="ver_estados_financieros"),
     path('balance_general',views.VerBalanceGeneral.as_view(),name="ver_balance_general"),
     path('balance/actualizar-monto/<int:id_cuenta>',views.TransaccionUpdateView.as_view(),name="actualizar-monto"),
     path('catalogo/',views.ListarCatalogo,name="catalogo"),
     path('cargaEmpresa/',views.CrearEmpresa,name="cargar-balance"),
     path('estado_resultados/', login_required(views.VerEstadoResultado.as_view()), name="ver_estado_resultado"),
     path('graficoVaricacion/', views.grafico_var, name='variacion_cuenta'),
-    path('calcular_ratios/',views.calcular_ratios,name="calcular_ratios"),
+    path('ratios_analisis_horizontal/',views.calcular_ratios2,name="calcular_ratios"),
     #HU-05-Definir Cuentas Ratios
     path('homeRatios/',views.homeRatios,name="home-ratios"),
     #path('selectRatios/',views.ActualizarCuentasRatios,name="crear-cuentas-ratios"),
