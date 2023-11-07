@@ -1,0 +1,96 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    ANF115 | Ratios
+{% endblock %}
+
+{% block content %}  
+{% if error is None %}
+<form action="" method="POST" id="yearForm">
+    {% csrf_token %}
+    <p>Seleccione un año para comparar los ratios con el año anterior: </p>
+    <select name="selectAño1" id="selectAño1" required class="form-select">
+        {% for año in listaAños %}
+        {% if forloop.counter != 1 %}
+        <option value="{{año.anio}}">{{año.anio}}</option>
+        {% endif %}
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary mt-2">Ver ratios</button>
+</form>
+
+
+
+{% endif %}
+    
+    {% if error is None %}
+    {% if listaAimprimir %}
+    <h4 class="text-center mt-4">{{empresa}}</h4>
+    <div class="text-center fw-400 mb-3">
+        Ratios
+    </div>
+    <div class="d-flex justify-content-center mt-3">
+        <p>Período: {{anio1}}-{{anio2}}</p>
+    </div>
+
+<div class="d-flex justify-content-center">
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover">
+            <tr>
+                <td style="background-color: green;"></td><td>El valor del ratio aumentó</td>
+            </tr>
+            <tr>
+                <td style="background-color: red;"></td><td>El valor del ratio disminuyó</td>
+            </tr>
+            <tr>
+                <td style="background-color: gray;"></td><td>El valor del ratio no presentó cambio</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+    <div class="table-responsive">
+        
+        <table class="table table-borderless table-hover">
+            <thead>
+                <th>Nombre</th>
+                <th>{{anio1}}</th>
+                <th>{{anio2}}</th>
+            </thead>
+            <tbody>
+                    {% for elemento in listaAimprimir %}
+                    <tr>
+                    <td>{{elemento.nombre}}</td>
+                    <td>{{ elemento.ratio1|floatformat:2 }}</td>
+                    {% if elemento.ratio1 > elemento.ratio2 %}
+                    <td style="background-color: red;">{{ elemento.ratio2|floatformat:2 }}</td>
+                    {% elif elemento.ratio1 < elemento.ratio2 %}
+                    <td style="background-color: green;">{{ elemento.ratio2|floatformat:2 }}</td>
+                    {% elif elemento.ratio1 == elemento.ratio2 %}
+                    <td style="background-color: gray;">{{ elemento.ratio2|floatformat:2 }}</td>
+                    {% endif %}
+                    </tr>
+                    
+                    {% endfor %}
+            </tbody>
+        </table>
+    
+    </div>
+    {% endif  %}
+    {% else %}
+    <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-center">
+            <div class="alert alert-danger" role="alert">
+                {{error}}
+              </div>
+        </div>
+    </div>
+    
+    {% endif %}
+    
+    
+{% endblock %}
+
+{% block filtros%}
+</br>
+{% endblock %}
