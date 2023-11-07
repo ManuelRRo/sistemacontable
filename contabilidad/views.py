@@ -53,6 +53,18 @@ def home(request):
     context['empresa'] = empresa
     return render(request,'home/inicio.html', context)
 
+#
+# Para mostrar pantalla de estados financieros
+#
+@login_required
+def estados_financieros(request):
+    context = {}
+    propietario = Propietario.objects.filter(user = request.user).first()
+    empresa = Empresa.objects.filter(propietario = propietario).first()
+    context['propietario'] = propietario
+    context['empresa'] = empresa
+    return render(request,'estados_financieros/home_estados_financieros.html', context)
+
 
 #HU-19-Grafico de variacion
 @sync_to_async
